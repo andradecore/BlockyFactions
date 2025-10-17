@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.blockycraft</groupId>
+    <artifactId>NomeDoPlugin.java</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <name>NomeDoPlugin.jar</name>
+    <description>Descriçã do Plugin</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- Caminho para a pasta do servidor montada no contêiner -->
+        <minecraft.server.path>/minecraft-server</minecraft.server.path>
+    </properties>
+
+    <!-- O repositório não é usado para a dependência principal, mas é bom manter para futuras necessidades -->
+    <repositories>
+        <repository>
+            <id>spigotmc-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Dependência do Bukkit via arquivo local (server.jar) -->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.3-beta-SNAPSHOT</version> <!-- A versão é apenas descritiva -->
+            <scope>system</scope>
+            <systemPath>${minecraft.server.path}/server.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+            <!-- Plugin do Compilador Java -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <!-- Plugin de Recursos para copiar o .jar compilado -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-jar-to-plugins</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <!-- Diretório de destino: a pasta /plugins do seu servidor -->
+                            <outputDirectory>${minecraft.server.path}/plugins</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>${project.build.finalName}.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
