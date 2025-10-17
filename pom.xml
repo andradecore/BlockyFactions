@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.blockycraft</groupId>
-    <artifactId>NomeDoPlugin.java</artifactId>
+    <artifactId>BlockyFactions.java</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>NomeDoPlugin.jar</name>
-    <description>Descriçã do Plugin</description>
+    <name>BlockyFactions.jar</name>
+    <description>A Factions system for BlockyCRAFT</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

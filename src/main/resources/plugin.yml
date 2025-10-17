@@ -1,5 +1,10 @@
-name:
-main: com.blockycraft.meuplugin.ClassePrincipal
-version: 1.0
+name: BlockyFactions
+main: com.blockycraft.blockyfactions.BlockyFactions
+version: 1.0.0
 author: Bernardo Zukerman
-description:
+description: Plugin de faccoes com integracao ao BlockyClaim.
+
+commands:
+  fac:
+    description: Comando principal para gerenciar faccoes.
+    usage: /fac <ajuda>
