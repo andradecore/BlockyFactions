@@ -13,7 +13,7 @@ BlockyFactions é um plugin de facções projetado para o servidor BlockyCRAFT. 
 - Todas as informações da facção, incluindo membros e configurações, são salvas em arquivos `.yml` individuais no servidor.
 
 ## Integração com BlockyClaim
-O BlockyFactions ativa um sistema de **"Trust Automático"** no BlockyClaim. Jogadores que pertencem à mesma facção automaticamente recebem permissão de construção e interação nos terrenos uns dos outros, como se tivessem usado `/trust`. Esta permissão é gerenciada pela facção e não pode ser removida individualmente com `/untrust`.
+O BlockyFactions ativa um sistema de **"Trust Automático"** no [BlockyClaim](https://github.com/andradecore/BlockyClaim). Jogadores que pertencem à mesma facção automaticamente recebem permissão de construção e interação nos terrenos uns dos outros, como se tivessem usado `/trust`. Esta permissão é gerenciada pela facção e não pode ser removida individualmente com `/untrust`.
 
 ## Tutorial de Comandos
 
