@@ -1,5 +1,6 @@
 package com.blockycraft.blockyfactions;
 
+import com.blockycraft.blockyfactions.api.BlockyFactionsAPI; // <-- NOVO IMPORT
 import com.blockycraft.blockyfactions.commands.FactionsCommandManager;
 import com.blockycraft.blockyfactions.managers.FactionManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,6 +13,9 @@ public class BlockyFactions extends JavaPlugin {
     public void onEnable() {
         this.factionManager = new FactionManager(this);
         this.factionManager.loadFactions();
+
+        // Inicializa a API para que outros plugins possam usá-la
+        BlockyFactionsAPI.initialize(this); // <-- NOVA LINHA
 
         registerCommands();
 
