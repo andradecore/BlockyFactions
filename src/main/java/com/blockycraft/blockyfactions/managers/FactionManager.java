@@ -6,7 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FactionManager {
@@ -20,46 +22,21 @@ public class FactionManager {
         this.plugin = plugin;
     }
 
-    public void listFactionInfo(Player viewer, String factionName) {
-        Faction faction = getFactionByName(factionName);
-        if (faction == null) {
-            viewer.sendMessage("§cA faccao '" + factionName + "' nao foi encontrada.");
-            return;
-        }
+    public List<Faction> getRankedFactions() {
+        List<Faction> factionsList = new ArrayList<Faction>(factions.values());
 
-        viewer.sendMessage("§e--- Informacoes da Faccao ---");
-        viewer.sendMessage("§bNome: §f" + faction.getName() + " §7[" + faction.getTag() + "]");
-        viewer.sendMessage("§bLider: §f" + faction.getLeader());
+        // Ordena a lista usando um Comparator.
+        // O Double.compare(f2.getNetWorth(), f1.getNetWorth()) garante a ordem decrescente (do maior para o menor).
+        factionsList.sort(new Comparator<Faction>() {
+            @Override
+            public int compare(Faction f1, Faction f2) {
+                return Double.compare(f2.getNetWorth(), f1.getNetWorth());
+            }
+        });
 
-        String treasuryPlayer = faction.getTreasuryPlayer();
-        if (treasuryPlayer == null || treasuryPlayer.isEmpty()) {
-            viewer.sendMessage("§bFundo: §fNenhum definido");
-        } else {
-            viewer.sendMessage("§bFundo: §f" + treasuryPlayer);
-        }
-
-        viewer.sendMessage("§bPatrimonio: §f" + faction.getNetWorth() + " barras");
-        viewer.sendMessage("§bPVP: " + (faction.isPvpEnabled() ? "§cAtivado" : "§aDesativado"));
-
-        String officials = String.join(", ", faction.getOfficials());
-        if (officials.isEmpty()) { officials = "Nenhum"; }
-        viewer.sendMessage("§bOficiais (" + faction.getOfficials().size() + "): §f" + officials);
-
-        ArrayList<String> plainMembers = new ArrayList<String>(faction.getMembers());
-        String members = String.join(", ", plainMembers);
-        if (members.isEmpty()) { members = "Nenhum"; }
-        viewer.sendMessage("§bMembros (" + plainMembers.size() + "): §f" + members);
-        
-        int totalMembers = 1 + faction.getOfficials().size() + plainMembers.size();
-        // CORREÇÃO: Adicionada verificação de nulo para segurança
-        if (treasuryPlayer != null && !treasuryPlayer.isEmpty()) { 
-            totalMembers++; 
-        }
-        viewer.sendMessage("§bTotal de Membros: §f" + totalMembers);
-        viewer.sendMessage("§e--------------------------");
+        return factionsList;
     }
 
-    // ... (O restante do arquivo permanece exatamente o mesmo) ...
     public boolean createFaction(String name, String tag, Player leader) {
         if (factions.containsKey(name.toLowerCase()) || isTagInUse(tag)) {
             leader.sendMessage("§cUma faccao com este nome ou tag ja existe.");
@@ -182,6 +159,44 @@ public class FactionManager {
         }
     }
     
+    public void listFactionInfo(Player viewer, String factionName) {
+        Faction faction = getFactionByName(factionName);
+        if (faction == null) {
+            viewer.sendMessage("§cA faccao '" + factionName + "' nao foi encontrada.");
+            return;
+        }
+
+        viewer.sendMessage("§e--- Informacoes da Faccao ---");
+        viewer.sendMessage("§bNome: §f" + faction.getName() + " §7[" + faction.getTag() + "]");
+        viewer.sendMessage("§bLider: §f" + faction.getLeader());
+
+        String treasuryPlayer = faction.getTreasuryPlayer();
+        if (treasuryPlayer == null || treasuryPlayer.isEmpty()) {
+            viewer.sendMessage("§bFundo: §fNenhum definido");
+        } else {
+            viewer.sendMessage("§bFundo: §f" + treasuryPlayer);
+        }
+
+        viewer.sendMessage("§bPatrimonio: §f" + faction.getNetWorth() + " barras");
+        viewer.sendMessage("§bPVP: " + (faction.isPvpEnabled() ? "§cAtivado" : "§aDesativado"));
+
+        String officials = String.join(", ", faction.getOfficials());
+        if (officials.isEmpty()) { officials = "Nenhum"; }
+        viewer.sendMessage("§bOficiais (" + faction.getOfficials().size() + "): §f" + officials);
+
+        ArrayList<String> plainMembers = new ArrayList<String>(faction.getMembers());
+        String members = String.join(", ", plainMembers);
+        if (members.isEmpty()) { members = "Nenhum"; }
+        viewer.sendMessage("§bMembros (" + plainMembers.size() + "): §f" + members);
+        
+        int totalMembers = 1 + faction.getOfficials().size() + plainMembers.size();
+        if (treasuryPlayer != null && !treasuryPlayer.isEmpty()) { 
+            totalMembers++; 
+        }
+        viewer.sendMessage("§bTotal de Membros: §f" + totalMembers);
+        viewer.sendMessage("§e--------------------------");
+    }
+
     public void kickPlayer(Player kicker, String targetName) {
         Faction faction = getPlayerFaction(kicker.getName());
 

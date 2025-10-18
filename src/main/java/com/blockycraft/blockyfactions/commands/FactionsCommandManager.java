@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import java.util.List;
 
 public class FactionsCommandManager implements CommandExecutor {
 
@@ -118,6 +119,25 @@ public class FactionsCommandManager implements CommandExecutor {
                 return true;
             }
             plugin.getFactionManager().transferLeadership(player, args[1]);
+
+        } else if (subCommand.equals("rank")) {
+            List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
+            
+            if (rankedFactions.isEmpty()) {
+                player.sendMessage("§cO ranking de faccoes esta vazio.");
+                return true;
+            }
+            
+            player.sendMessage("§e--- Ranking de Faccoes (por Patrimonio) ---");
+            int rank = 1;
+            for (Faction faction : rankedFactions) {
+                player.sendMessage("§b#" + rank + ". §7[" + faction.getTag() + "] §f" + faction.getName() + " §e- " + faction.getNetWorth() + " barras");
+                rank++;
+                if (rank > 10) {
+                    break;
+                }
+            }
+            player.sendMessage("§e------------------------------------");
 
         } else if (subCommand.equals("sair")) {
             plugin.getFactionManager().leaveFaction(player);
