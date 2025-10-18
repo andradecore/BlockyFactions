@@ -10,11 +10,9 @@ public class BlockyFactions extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Inicializa os managers
         this.factionManager = new FactionManager(this);
         this.factionManager.loadFactions();
 
-        // Registra os comandos
         registerCommands();
 
         System.out.println("[BlockyFactions] Plugin ativado com sucesso!");
@@ -28,7 +26,6 @@ public class BlockyFactions extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Salva os dados das facções
         if (this.factionManager != null) {
             this.factionManager.saveFactions();
         }
@@ -36,7 +33,6 @@ public class BlockyFactions extends JavaPlugin {
         System.out.println("[BlockyFactions] Plugin desativado.");
     }
 
-    // Getters para os managers
     public FactionManager getFactionManager() {
         return factionManager;
     }

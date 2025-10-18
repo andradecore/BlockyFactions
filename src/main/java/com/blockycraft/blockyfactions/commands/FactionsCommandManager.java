@@ -1,6 +1,7 @@
 package com.blockycraft.blockyfactions.commands;
 
 import com.blockycraft.blockyfactions.BlockyFactions;
+import com.blockycraft.blockyfactions.data.Faction;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -60,6 +61,64 @@ public class FactionsCommandManager implements CommandExecutor {
             String factionName = args[1];
             plugin.getFactionManager().joinFaction(player, factionName);
         
+        } else if (subCommand.equals("list")) {
+            if (args.length == 1) {
+                Faction playerFaction = plugin.getFactionManager().getPlayerFaction(player.getName());
+                if (playerFaction == null) {
+                    player.sendMessage("§cVoce nao esta em uma faccao. Use /fac list <nome-da-faccao> para ver informacoes de outra faccao.");
+                    return true;
+                }
+                plugin.getFactionManager().listFactionInfo(player, playerFaction.getName());
+            } else {
+                String factionToList = args[1];
+                plugin.getFactionManager().listFactionInfo(player, factionToList);
+            }
+
+        } else if (subCommand.equals("expulsar")) {
+            if (args.length < 2) {
+                player.sendMessage("§cUse: /fac expulsar <jogador>");
+                return true;
+            }
+            String targetName = args[1];
+            plugin.getFactionManager().kickPlayer(player, targetName);
+
+        } else if (subCommand.equals("promover")) {
+            if (args.length < 3) {
+                player.sendMessage("§cUse: /fac promover <jogador> <oficial|membro>");
+                return true;
+            }
+            String targetName = args[1];
+            String rank = args[2];
+            plugin.getFactionManager().setPlayerRank(player, targetName, rank);
+        
+        } else if (subCommand.equals("pvp")) {
+            if (args.length < 2) {
+                player.sendMessage("§cUse: /fac pvp <on|off>");
+                return true;
+            }
+            plugin.getFactionManager().setFactionPvp(player, args[1]);
+
+        } else if (subCommand.equals("fundo")) {
+            if (args.length < 2) {
+                player.sendMessage("§cUse: /fac fundo <jogador|nenhum>");
+                return true;
+            }
+            plugin.getFactionManager().setTreasuryPlayer(player, args[1]);
+
+        } else if (subCommand.equals("tag")) {
+            if (args.length < 2) {
+                player.sendMessage("§cUse: /fac tag <nova-tag>");
+                return true;
+            }
+            plugin.getFactionManager().setFactionTag(player, args[1]);
+
+        } else if (subCommand.equals("lider")) {
+            if (args.length < 2) {
+                player.sendMessage("§cUse: /fac lider <jogador>");
+                return true;
+            }
+            plugin.getFactionManager().transferLeadership(player, args[1]);
+
         } else if (subCommand.equals("sair")) {
             plugin.getFactionManager().leaveFaction(player);
 
