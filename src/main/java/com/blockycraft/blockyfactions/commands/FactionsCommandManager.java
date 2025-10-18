@@ -26,14 +26,24 @@ public class FactionsCommandManager implements CommandExecutor {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            showHelp(player); // Mostra a ajuda se nenhum comando for especificado
+            showHelp(player, 1); // Se o jogador digitar apenas /fac, mostra a primeira página da ajuda
             return true;
         }
 
         String subCommand = args[0].toLowerCase();
 
         if (subCommand.equals("ajuda")) {
-            showHelp(player); // Mostra a ajuda com /fac ajuda
+            int page = 1; // Página padrão é 1
+            if (args.length > 1) {
+                try {
+                    // Tenta ler o número da página do segundo argumento
+                    page = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    player.sendMessage("§c'" + args[1] + "' nao e um numero de pagina valido.");
+                    return true;
+                }
+            }
+            showHelp(player, page);
             
         } else if (subCommand.equals("criar")) {
             if (args.length < 3) {
@@ -151,23 +161,34 @@ public class FactionsCommandManager implements CommandExecutor {
         return true;
     }
 
-    private void showHelp(Player player) {
-        player.sendMessage("§e--- Ajuda do BlockyFaccao ---");
-        player.sendMessage("§b/fac ajuda §7- Mostra esta mensagem.");
-        player.sendMessage("§b/fac criar <tag> <nome> §7- Cria uma nova faccao.");
-        player.sendMessage("§b/fac sair §7- Sai da sua faccao atual.");
-        player.sendMessage("§b/fac convidar <jogador> §7- Convida um jogador para a faccao.");
-        player.sendMessage("§b/fac entrar <faccao> §7- Aceita um convite para uma faccao.");
-        player.sendMessage("§b/fac list [faccao] §7- Mostra informacoes da sua ou de outra faccao.");
-        player.sendMessage("§b/fac rank §7- Mostra o ranking de faccoes.");
-        player.sendMessage("§e--- Comandos de Lider/Oficial ---");
-        player.sendMessage("§b/fac expulsar <jogador> §7- Expulsa um membro.");
-        player.sendMessage("§e--- Comandos de Lider ---");
-        player.sendMessage("§b/fac promover <jogador> <oficial|membro> §7- Altera o cargo de um membro.");
-        player.sendMessage("§b/fac lider <jogador> §7- Transfere a lideranca.");
-        player.sendMessage("§b/fac fundo <jogador|nenhum> §7- Define o tesoureiro da faccao.");
-        player.sendMessage("§b/fac tag <nova-tag> §7- Altera a tag da faccao.");
-        player.sendMessage("§b/fac pvp <on|off> §7- Ativa/desativa o pvp interno.");
-        player.sendMessage("§e-----------------------------");
+    private void showHelp(Player player, int page) {
+        switch (page) {
+            case 1:
+                player.sendMessage("§e--- Ajuda do BlockyFaccao (Pagina 1/2) ---");
+                player.sendMessage("§b/fac ajuda [pagina] §7- Mostra esta mensagem.");
+                player.sendMessage("§b/fac criar <tag> <nome> §7- Cria uma nova faccao.");
+                player.sendMessage("§b/fac sair §7- Sai da sua faccao atual.");
+                player.sendMessage("§b/fac convidar <jogador> §7- Convida um jogador.");
+                player.sendMessage("§b/fac entrar <faccao> §7- Aceita um convite.");
+                player.sendMessage("§b/fac list [faccao] §7- Mostra informacoes.");
+                player.sendMessage("§b/fac rank §7- Mostra o ranking de faccoes.");
+                player.sendMessage("§eDigite /fac ajuda 2 para a proxima pagina.");
+                break;
+            case 2:
+                player.sendMessage("§e--- Ajuda do BlockyFaccao (Pagina 2/2) ---");
+                player.sendMessage("§e-- Comandos de Lider/Oficial --");
+                player.sendMessage("§b/fac expulsar <jogador> §7- Expulsa um membro.");
+                player.sendMessage("§e-- Comandos de Lider --");
+                player.sendMessage("§b/fac promover <jogador> <oficial|membro> §7- Altera o cargo.");
+                player.sendMessage("§b/fac lider <jogador> §7- Transfere a lideranca.");
+                player.sendMessage("§b/fac fundo <jogador|nenhum> §7- Define o tesoureiro.");
+                player.sendMessage("§b/fac tag <nova-tag> §7- Altera a tag da faccao.");
+                player.sendMessage("§b/fac pvp <on|off> §7- Ativa/desativa o pvp interno.");
+                player.sendMessage("§e-----------------------------");
+                break;
+            default:
+                player.sendMessage("§cPagina de ajuda nao encontrada. Paginas disponiveis: 1 e 2.");
+                break;
+        }
     }
 }
