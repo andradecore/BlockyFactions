@@ -26,25 +26,54 @@ public class FactionsCommandManager implements CommandExecutor {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            showHelp(player, 1); // Se o jogador digitar apenas /fac, mostra a primeira página da ajuda
+            showHelp(player, 1);
             return true;
         }
 
-        String subCommand = args[0].toLowerCase();
+        try {
+            int page = Integer.parseInt(args[0]);
+            showHelp(player, page);
+            return true;
+        } catch (NumberFormatException e) {
+            // Não é um número, então continua...
+        }
 
-        if (subCommand.equals("ajuda")) {
-            int page = 1; // Página padrão é 1
-            if (args.length > 1) {
-                try {
-                    // Tenta ler o número da página do segundo argumento
-                    page = Integer.parseInt(args[1]);
-                } catch (NumberFormatException e) {
-                    player.sendMessage("§c'" + args[1] + "' nao e um numero de pagina valido.");
+        String subCommand = args[0].toLowerCase();
+        
+        if (subCommand.equals("list")) {
+            if (args.length == 1) {
+                Faction playerFaction = plugin.getFactionManager().getPlayerFaction(player.getName());
+                if (playerFaction == null) {
+                    player.sendMessage("§cVoce nao esta em uma faccao. Use /fac list <nome-da-faccao> para ver informacoes de outra faccao.");
                     return true;
                 }
+                plugin.getFactionManager().listFactionInfo(player, playerFaction.getName());
+            } else {
+                String factionToList = args[1];
+                plugin.getFactionManager().listFactionInfo(player, factionToList);
             }
-            showHelp(player, page);
+
+        } else if (subCommand.equals("rank")) {
+            plugin.getFactionManager().reloadAllFactionsNetWorth();
             
+            List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
+            
+            if (rankedFactions.isEmpty()) {
+                player.sendMessage("§cO ranking de faccoes esta vazio.");
+                return true;
+            }
+            
+            player.sendMessage("§e--- Ranking de Faccoes (por Patrimonio) ---");
+            int rank = 1;
+            for (Faction faction : rankedFactions) {
+                player.sendMessage("§b#" + rank + ". §7[" + faction.getTag() + "] §f" + faction.getName() + " §e- " + faction.getNetWorth() + " barras");
+                rank++;
+                if (rank > 10) {
+                    break;
+                }
+            }
+            player.sendMessage("§e------------------------------------");
+
         } else if (subCommand.equals("criar")) {
             if (args.length < 3) {
                 player.sendMessage("§cUse: /fac criar <tag> <nome-da-faccao>");
@@ -73,19 +102,6 @@ public class FactionsCommandManager implements CommandExecutor {
             }
             String factionName = args[1];
             plugin.getFactionManager().joinFaction(player, factionName);
-        
-        } else if (subCommand.equals("list")) {
-            if (args.length == 1) {
-                Faction playerFaction = plugin.getFactionManager().getPlayerFaction(player.getName());
-                if (playerFaction == null) {
-                    player.sendMessage("§cVoce nao esta em uma faccao. Use /fac list <nome-da-faccao> para ver informacoes de outra faccao.");
-                    return true;
-                }
-                plugin.getFactionManager().listFactionInfo(player, playerFaction.getName());
-            } else {
-                String factionToList = args[1];
-                plugin.getFactionManager().listFactionInfo(player, factionToList);
-            }
 
         } else if (subCommand.equals("expulsar")) {
             if (args.length < 2) {
@@ -131,31 +147,12 @@ public class FactionsCommandManager implements CommandExecutor {
                 return true;
             }
             plugin.getFactionManager().transferLeadership(player, args[1]);
-
-        } else if (subCommand.equals("rank")) {
-            List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
-            
-            if (rankedFactions.isEmpty()) {
-                player.sendMessage("§cO ranking de faccoes esta vazio.");
-                return true;
-            }
-            
-            player.sendMessage("§e--- Ranking de Faccoes (por Patrimonio) ---");
-            int rank = 1;
-            for (Faction faction : rankedFactions) {
-                player.sendMessage("§b#" + rank + ". §7[" + faction.getTag() + "] §f" + faction.getName() + " §e- " + faction.getNetWorth() + " barras");
-                rank++;
-                if (rank > 10) {
-                    break;
-                }
-            }
-            player.sendMessage("§e------------------------------------");
-
+        
         } else if (subCommand.equals("sair")) {
             plugin.getFactionManager().leaveFaction(player);
 
         } else {
-            player.sendMessage("§cComando desconhecido. Use /fac ajuda para ver a lista de comandos.");
+            player.sendMessage("§cComando desconhecido. Use /fac para ver a lista de comandos.");
         }
 
         return true;
@@ -165,14 +162,14 @@ public class FactionsCommandManager implements CommandExecutor {
         switch (page) {
             case 1:
                 player.sendMessage("§e--- Ajuda do BlockyFaccao (Pagina 1/2) ---");
-                player.sendMessage("§b/fac ajuda [pagina] §7- Mostra esta mensagem.");
+                player.sendMessage("§b/fac [pagina] §7- Mostra a ajuda.");
                 player.sendMessage("§b/fac criar <tag> <nome> §7- Cria uma nova faccao.");
                 player.sendMessage("§b/fac sair §7- Sai da sua faccao atual.");
                 player.sendMessage("§b/fac convidar <jogador> §7- Convida um jogador.");
                 player.sendMessage("§b/fac entrar <faccao> §7- Aceita um convite.");
                 player.sendMessage("§b/fac list [faccao] §7- Mostra informacoes.");
                 player.sendMessage("§b/fac rank §7- Mostra o ranking de faccoes.");
-                player.sendMessage("§eDigite /fac ajuda 2 para a proxima pagina.");
+                player.sendMessage("§eDigite /fac 2 para a proxima pagina.");
                 break;
             case 2:
                 player.sendMessage("§e--- Ajuda do BlockyFaccao (Pagina 2/2) ---");
