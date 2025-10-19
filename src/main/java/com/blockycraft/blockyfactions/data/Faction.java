@@ -10,9 +10,10 @@ public class Faction {
     private String leader;
     private List<String> officials;
     private List<String> members;
-    private String treasuryPlayer; // O jogador "fundo"
+    private String treasuryPlayer;
     private double netWorth;
     private boolean pvpEnabled;
+    private String colorHex; // NOVO CAMPO
 
     public Faction(String name, String tag, String leader) {
         this.name = name;
@@ -23,6 +24,7 @@ public class Faction {
         this.treasuryPlayer = "";
         this.netWorth = 0.0;
         this.pvpEnabled = false;
+        this.colorHex = "#FFFFFF"; // Cor padrão de fallback
     }
 
     // Getters
@@ -34,6 +36,7 @@ public class Faction {
     public String getTreasuryPlayer() { return treasuryPlayer; }
     public double getNetWorth() { return netWorth; }
     public boolean isPvpEnabled() { return pvpEnabled; }
+    public String getColorHex() { return colorHex; } // NOVO GETTER
 
     // Setters
     public void setTag(String tag) { this.tag = tag; }
@@ -41,6 +44,7 @@ public class Faction {
     public void setTreasuryPlayer(String treasuryPlayer) { this.treasuryPlayer = treasuryPlayer; }
     public void setNetWorth(double netWorth) { this.netWorth = netWorth; }
     public void setPvpEnabled(boolean pvpEnabled) { this.pvpEnabled = pvpEnabled; }
+    public void setColorHex(String colorHex) { this.colorHex = colorHex; } // NOVO SETTER
     
     public void addMember(String playerName) {
         if (!isMember(playerName)) {

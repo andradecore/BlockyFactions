@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class FactionManager {
 
@@ -22,102 +23,22 @@ public class FactionManager {
         this.plugin = plugin;
     }
 
-    // --- MÉTODO leaveFaction ATUALIZADO ---
-    public void leaveFaction(Player player) {
-        Faction faction = getPlayerFaction(player.getName());
-
-        if (faction == null) {
-            player.sendMessage("§cVoce nao pertence a nenhuma faccao.");
-            return;
-        }
-
-        String playerName = player.getName();
-
-        // Verifica se quem está saindo é o líder
-        if (faction.getLeader().equalsIgnoreCase(playerName)) {
-            List<String> officials = faction.getOfficials();
-            
-            // Se não houver oficiais para assumir, dissolve a facção
-            if (officials.isEmpty()) {
-                dissolveFaction(faction, player);
-            } else {
-                // Se houver oficiais, promove o primeiro da lista a novo líder
-                String newLeaderName = officials.get(0);
-                
-                // Atualiza os dados da facção
-                faction.setLeader(newLeaderName);
-                faction.getOfficials().remove(newLeaderName.toLowerCase()); // Remove o novo líder da lista de oficiais
-                
-                // Remove o antigo líder do mapa de jogadores
-                playerToFactionMap.remove(playerName.toLowerCase());
-                
-                saveFactionToFile(faction);
-                
-                // Envia as notificações
-                player.sendMessage("§aVoce deixou a lideranca da faccao " + faction.getName() + ". " + newLeaderName + " e o novo lider.");
-                
-                Player newLeader = plugin.getServer().getPlayer(newLeaderName);
-                if (newLeader != null && newLeader.isOnline()) {
-                    newLeader.sendMessage("§aO lider deixou a faccao. Voce foi promovido a novo lider da faccao " + faction.getName() + "!");
-                }
-                
-                // Notifica todos os membros restantes
-                for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
-                    // Verifica se o jogador pertence à facção e não é o novo líder (que já recebeu msg)
-                    if (faction.isMember(onlinePlayer.getName()) && !onlinePlayer.getName().equalsIgnoreCase(newLeaderName)) {
-                        onlinePlayer.sendMessage("§eO lider " + playerName + " deixou a faccao. " + newLeaderName + " e o novo lider!");
-                    }
-                }
-            }
-        } else {
-            // Se um membro ou oficial comum estiver saindo, a lógica continua a mesma
-            faction.removeMember(playerName);
-            playerToFactionMap.remove(playerName.toLowerCase());
-            
-            saveFactionToFile(faction);
-            
-            player.sendMessage("§aVoce saiu da faccao " + faction.getName() + ".");
-            Player leader = plugin.getServer().getPlayer(faction.getLeader());
-            if (leader != null && leader.isOnline()) {
-                leader.sendMessage("§eO jogador " + playerName + " saiu da sua faccao.");
-            }
-        }
-    }
-
-    // --- DEMAIS MÉTODOS (sem alterações) ---
-
-    public List<Faction> getRankedFactions() {
-        List<Faction> factionsList = new ArrayList<Faction>(factions.values());
-
-        factionsList.sort(new Comparator<Faction>() {
-            @Override
-            public int compare(Faction f1, Faction f2) {
-                return Double.compare(f2.getNetWorth(), f1.getNetWorth());
-            }
-        });
-
-        return factionsList;
-    }
-
-    public void reloadFactionNetWorth(Faction faction) {
-        if (faction == null) return;
-        
-        File factionFile = new File(plugin.getDataFolder() + "/factions", faction.getName().toLowerCase() + ".yml");
-        if (factionFile.exists()) {
-            Configuration factionConfig = new Configuration(factionFile);
-            factionConfig.load();
-            double newNetWorth = factionConfig.getDouble("net_worth", 0.0);
-            faction.setNetWorth(newNetWorth);
-        }
-    }
-
-    public void reloadAllFactionsNetWorth() {
-        for (Faction faction : factions.values()) {
-            reloadFactionNetWorth(faction);
-        }
-    }
+    // --- LÓGICA DE CRIAÇÃO ATUALIZADA ---
 
     public boolean createFaction(String name, String tag, Player leader) {
+        String randomColor = generateRandomHexColor();
+        return createFactionInternal(name, tag, leader, randomColor);
+    }
+
+    public boolean createFaction(String name, String tag, Player leader, String colorHex) {
+        if (!isValidHexCode(colorHex)) {
+            leader.sendMessage("§cO codigo de cor '" + colorHex + "' e invalido. Use o formato #RRGGBB.");
+            return false;
+        }
+        return createFactionInternal(name, tag, leader, colorHex);
+    }
+
+    private boolean createFactionInternal(String name, String tag, Player leader, String colorHex) {
         if (factions.containsKey(name.toLowerCase()) || isTagInUse(tag)) {
             leader.sendMessage("§cUma faccao com este nome ou tag ja existe.");
             return false;
@@ -134,44 +55,117 @@ public class FactionManager {
         }
 
         Faction newFaction = new Faction(name, tag, leader.getName());
+        newFaction.setColorHex(colorHex.toUpperCase());
         
         factions.put(name.toLowerCase(), newFaction);
         playerToFactionMap.put(leader.getName().toLowerCase(), name);
         
         saveFactionToFile(newFaction);
 
-        leader.sendMessage("§aFaccao '" + name + "' criada com sucesso!");
+        leader.sendMessage("§aFaccao '" + name + "' criada com sucesso com a cor " + colorHex.toUpperCase() + "!");
         return true;
     }
-    
+
+    private String generateRandomHexColor() {
+        Random random = new Random();
+        int nextInt = random.nextInt(0xFFFFFF + 1);
+        return String.format("#%06X", nextInt);
+    }
+
+    private boolean isValidHexCode(String code) {
+        if (code == null) return false;
+        return code.matches("^#[a-fA-F0-9]{6}$");
+    }
+
+    public void leaveFaction(Player player) {
+        Faction faction = getPlayerFaction(player.getName());
+        if (faction == null) {
+            player.sendMessage("§cVoce nao pertence a nenhuma faccao.");
+            return;
+        }
+        String playerName = player.getName();
+        if (faction.getLeader().equalsIgnoreCase(playerName)) {
+            List<String> officials = faction.getOfficials();
+            if (officials.isEmpty()) {
+                dissolveFaction(faction, player);
+            } else {
+                String newLeaderName = officials.get(0);
+                faction.setLeader(newLeaderName);
+                faction.getOfficials().remove(newLeaderName.toLowerCase());
+                playerToFactionMap.remove(playerName.toLowerCase());
+                saveFactionToFile(faction);
+                player.sendMessage("§aVoce deixou a lideranca da faccao " + faction.getName() + ". " + newLeaderName + " e o novo lider.");
+                Player newLeader = plugin.getServer().getPlayer(newLeaderName);
+                if (newLeader != null && newLeader.isOnline()) {
+                    newLeader.sendMessage("§aO lider deixou a faccao. Voce foi promovido a novo lider da faccao " + faction.getName() + "!");
+                }
+                for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+                    if (faction.isMember(onlinePlayer.getName()) && !onlinePlayer.getName().equalsIgnoreCase(newLeaderName)) {
+                        onlinePlayer.sendMessage("§eO lider " + playerName + " deixou a faccao. " + newLeaderName + " e o novo lider!");
+                    }
+                }
+            }
+        } else {
+            faction.removeMember(playerName);
+            playerToFactionMap.remove(playerName.toLowerCase());
+            saveFactionToFile(faction);
+            player.sendMessage("§aVoce saiu da faccao " + faction.getName() + ".");
+            Player leader = plugin.getServer().getPlayer(faction.getLeader());
+            if (leader != null && leader.isOnline()) {
+                leader.sendMessage("§eO jogador " + playerName + " saiu da sua faccao.");
+            }
+        }
+    }
+
+    public List<Faction> getRankedFactions() {
+        List<Faction> factionsList = new ArrayList<Faction>(factions.values());
+        factionsList.sort(new Comparator<Faction>() {
+            @Override
+            public int compare(Faction f1, Faction f2) {
+                return Double.compare(f2.getNetWorth(), f1.getNetWorth());
+            }
+        });
+        return factionsList;
+    }
+
+    public void reloadFactionNetWorth(Faction faction) {
+        if (faction == null) return;
+        File factionFile = new File(plugin.getDataFolder() + "/factions", faction.getName().toLowerCase() + ".yml");
+        if (factionFile.exists()) {
+            Configuration factionConfig = new Configuration(factionFile);
+            factionConfig.load();
+            double newNetWorth = factionConfig.getDouble("net_worth", 0.0);
+            faction.setNetWorth(newNetWorth);
+        }
+    }
+
+    public void reloadAllFactionsNetWorth() {
+        for (Faction faction : factions.values()) {
+            reloadFactionNetWorth(faction);
+        }
+    }
+
     public void invitePlayer(Player inviter, String targetName) {
         Faction faction = getPlayerFaction(inviter.getName());
-
         if (faction == null) {
             inviter.sendMessage("§cVoce nao esta em uma faccao para poder convidar alguem.");
             return;
         }
-
         String inviterName = inviter.getName().toLowerCase();
         if (!faction.getLeader().equalsIgnoreCase(inviterName) && !faction.getOfficials().contains(inviterName)) {
             inviter.sendMessage("§cVoce precisa ser o lider ou um oficial para convidar jogadores.");
             return;
         }
-        
         if (getPlayerFaction(targetName) != null) {
             inviter.sendMessage("§cO jogador " + targetName + " ja pertence a uma faccao.");
             return;
         }
-
         Player target = plugin.getServer().getPlayer(targetName);
-
         if (target == null || !target.isOnline()) {
             inviter.sendMessage("§cO jogador " + targetName + " nao esta online.");
             return;
         }
-
         pendingInvites.put(target.getName().toLowerCase(), faction.getName());
-
         inviter.sendMessage("§aVoce convidou " + target.getName() + " para a sua faccao.");
         target.sendMessage("§eVoce foi convidado para entrar na faccao " + faction.getName() + ".");
         target.sendMessage("§eDigite §b/fac entrar " + faction.getName() + " §epara aceitar.");
@@ -179,72 +173,59 @@ public class FactionManager {
 
     public void joinFaction(Player player, String factionName) {
         String playerName = player.getName().toLowerCase();
-
         if (getPlayerFaction(playerName) != null) {
             player.sendMessage("§cVoce ja esta em uma faccao.");
             return;
         }
-
         String invitedToFaction = pendingInvites.get(playerName);
         if (invitedToFaction == null || !invitedToFaction.equalsIgnoreCase(factionName)) {
             player.sendMessage("§cVoce nao tem um convite para a faccao " + factionName + ".");
             return;
         }
-        
         Faction faction = getFactionByName(invitedToFaction);
         if (faction == null) {
             player.sendMessage("§cEsta faccao nao existe mais.");
             pendingInvites.remove(playerName);
             return;
         }
-        
         pendingInvites.remove(playerName);
         faction.addMember(player.getName());
         playerToFactionMap.put(playerName, faction.getName());
-
         saveFactionToFile(faction);
-
         player.sendMessage("§aVoce entrou na faccao " + faction.getName() + "!");
-
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             if (faction.isMember(onlinePlayer.getName())) {
                 onlinePlayer.sendMessage("§e" + player.getName() + " entrou para a faccao!");
             }
         }
     }
-    
+
     public void listFactionInfo(Player viewer, String factionName) {
         Faction faction = getFactionByName(factionName);
         if (faction == null) {
             viewer.sendMessage("§cA faccao '" + factionName + "' nao foi encontrada.");
             return;
         }
-
         reloadFactionNetWorth(faction);
-
         viewer.sendMessage("§e--- Informacoes da Faccao ---");
         viewer.sendMessage("§bNome: §f" + faction.getName() + " §7[" + faction.getTag() + "]");
+        viewer.sendMessage("§bCor: §f" + faction.getColorHex());
         viewer.sendMessage("§bLider: §f" + faction.getLeader());
-
         String treasuryPlayer = faction.getTreasuryPlayer();
         if (treasuryPlayer == null || treasuryPlayer.isEmpty()) {
             viewer.sendMessage("§bFundo: §fNenhum definido");
         } else {
             viewer.sendMessage("§bFundo: §f" + treasuryPlayer);
         }
-
         viewer.sendMessage("§bPatrimonio: §f" + faction.getNetWorth() + " barras");
         viewer.sendMessage("§bPVP: " + (faction.isPvpEnabled() ? "§cAtivado" : "§aDesativado"));
-
         String officials = String.join(", ", faction.getOfficials());
         if (officials.isEmpty()) { officials = "Nenhum"; }
         viewer.sendMessage("§bOficiais (" + faction.getOfficials().size() + "): §f" + officials);
-
         ArrayList<String> plainMembers = new ArrayList<String>(faction.getMembers());
         String members = String.join(", ", plainMembers);
         if (members.isEmpty()) { members = "Nenhum"; }
         viewer.sendMessage("§bMembros (" + plainMembers.size() + "): §f" + members);
-        
         int totalMembers = 1 + faction.getOfficials().size() + plainMembers.size();
         if (treasuryPlayer != null && !treasuryPlayer.isEmpty()) { 
             totalMembers++; 
@@ -255,24 +236,20 @@ public class FactionManager {
 
     public void kickPlayer(Player kicker, String targetName) {
         Faction faction = getPlayerFaction(kicker.getName());
-
         if (faction == null) {
             kicker.sendMessage("§cVoce nao esta em uma faccao.");
             return;
         }
-
         String kickerName = kicker.getName().toLowerCase();
         if (!faction.getLeader().equalsIgnoreCase(kickerName) && !faction.getOfficials().contains(kickerName)) {
             kicker.sendMessage("§cVoce precisa ser o lider ou um oficial para expulsar jogadores.");
             return;
         }
-
         Faction targetFaction = getPlayerFaction(targetName);
         if (targetFaction == null || !targetFaction.getName().equals(faction.getName())) {
             kicker.sendMessage("§cO jogador " + targetName + " nao esta na sua faccao.");
             return;
         }
-        
         String targetNameLower = targetName.toLowerCase();
         if (faction.getLeader().equalsIgnoreCase(targetNameLower)) {
             kicker.sendMessage("§cVoce nao pode expulsar o lider da faccao.");
@@ -282,18 +259,14 @@ public class FactionManager {
             kicker.sendMessage("§cOficiais nao podem expulsar outros oficiais. Apenas o lider pode.");
             return;
         }
-
         faction.removeMember(targetName);
         playerToFactionMap.remove(targetNameLower);
         saveFactionToFile(faction);
-
         kicker.sendMessage("§aVoce expulsou " + targetName + " da faccao.");
-        
         Player targetPlayer = plugin.getServer().getPlayer(targetName);
         if (targetPlayer != null && targetPlayer.isOnline()) {
             targetPlayer.sendMessage("§cVoce foi expulso da faccao " + faction.getName() + ".");
         }
-        
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             if (faction.isMember(onlinePlayer.getName())) {
                 onlinePlayer.sendMessage("§e" + targetName + " foi expulso da faccao por " + kicker.getName() + ".");
@@ -305,16 +278,12 @@ public class FactionManager {
         Faction faction = getPlayerFaction(promoter.getName());
         if (faction == null) { promoter.sendMessage("§cVoce nao esta em uma faccao."); return; }
         if (!faction.getLeader().equalsIgnoreCase(promoter.getName())) { promoter.sendMessage("§cApenas o lider da faccao pode alterar cargos."); return; }
-        
         String targetNameLower = targetName.toLowerCase();
-        
         if (faction.getTreasuryPlayer().equalsIgnoreCase(targetNameLower)) {
             promoter.sendMessage("§cVoce nao pode alterar o cargo do Fundo. Remova-o do cargo primeiro.");
             return;
         }
-        
         if (!faction.isMember(targetName) || faction.getLeader().equalsIgnoreCase(targetName)) { promoter.sendMessage("§c" + targetName + " nao e um membro valido para alterar o cargo."); return; }
-
         if (rank.equalsIgnoreCase("oficial")) {
             if (faction.getOfficials().contains(targetNameLower)) { promoter.sendMessage("§c" + targetName + " ja e um oficial."); return; }
             faction.promotePlayer(targetName);
@@ -329,7 +298,6 @@ public class FactionManager {
             promoter.sendMessage("§cCargo invalido. Use 'oficial' ou 'membro'.");
             return;
         }
-        
         Player targetPlayer = plugin.getServer().getPlayer(targetName);
         if (targetPlayer != null && targetPlayer.isOnline()) {
             targetPlayer.sendMessage("§eSeu cargo na faccao foi alterado para " + rank.toUpperCase() + ".");
@@ -340,7 +308,6 @@ public class FactionManager {
         Faction faction = getPlayerFaction(leader.getName());
         if (faction == null) { leader.sendMessage("§cVoce nao esta em uma faccao."); return; }
         if (!faction.getLeader().equalsIgnoreCase(leader.getName())) { leader.sendMessage("§cApenas o lider pode definir o fundo da faccao."); return; }
-
         if (targetName.equalsIgnoreCase("nenhum")) {
             String oldFundo = faction.getTreasuryPlayer();
             if (!oldFundo.isEmpty()) {
@@ -353,64 +320,51 @@ public class FactionManager {
             }
             return;
         }
-
         if (!faction.isMember(targetName)) { leader.sendMessage("§cO jogador " + targetName + " nao e membro da sua faccao."); return; }
-        
         String targetNameLower = targetName.toLowerCase();
-        
         if (faction.getLeader().equalsIgnoreCase(targetNameLower) || faction.getOfficials().contains(targetNameLower)) {
             leader.sendMessage("§cUm Lider ou Oficial nao pode ser o Fundo da faccao.");
             return;
         }
-        
         String oldFundo = faction.getTreasuryPlayer();
         if (!oldFundo.isEmpty()) {
             faction.addMember(oldFundo);
         }
-
         faction.setTreasuryPlayer(targetName);
         faction.getMembers().remove(targetNameLower);
         saveFactionToFile(faction);
         leader.sendMessage("§aVoce definiu " + targetName + " como o fundo da faccao.");
     }
-    
+
     public void transferLeadership(Player oldLeader, String newLeaderName) {
         Faction faction = getPlayerFaction(oldLeader.getName());
         if (faction == null) { oldLeader.sendMessage("§cVoce nao esta em uma faccao."); return; }
         if (!faction.getLeader().equalsIgnoreCase(oldLeader.getName())) { oldLeader.sendMessage("§cVoce nao e o lider desta faccao."); return; }
-        
         if (faction.getTreasuryPlayer().equalsIgnoreCase(newLeaderName)) {
             oldLeader.sendMessage("§cVoce nao pode transferir a lideranca para o Fundo. Remova-o do cargo primeiro.");
             return;
         }
-        
         if (!faction.isMember(newLeaderName) || oldLeader.getName().equalsIgnoreCase(newLeaderName)) {
             oldLeader.sendMessage("§c" + newLeaderName + " nao e um membro valido para receber a lideranca.");
             return;
         }
-
         String oldLeaderName = oldLeader.getName();
-        
         faction.setLeader(newLeaderName);
         faction.removeMember(newLeaderName);
         faction.addMember(oldLeaderName);
-
         saveFactionToFile(faction);
-
         oldLeader.sendMessage("§aVoce transferiu a lideranca da faccao para " + newLeaderName + ".");
-        
         Player newLeader = plugin.getServer().getPlayer(newLeaderName);
         if (newLeader != null && newLeader.isOnline()) {
             newLeader.sendMessage("§aVoce agora e o novo lider da faccao " + faction.getName() + "!");
         }
-
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             if (faction.isMember(onlinePlayer.getName()) && !onlinePlayer.getName().equalsIgnoreCase(newLeaderName)) {
                  onlinePlayer.sendMessage("§e" + newLeaderName + " e o novo lider da faccao!");
             }
         }
     }
-    
+
     public void setFactionPvp(Player leader, String status) {
         Faction faction = getPlayerFaction(leader.getName());
         if (faction == null) {
@@ -421,7 +375,6 @@ public class FactionManager {
             leader.sendMessage("§cApenas o lider pode alterar o status de PVP da faccao.");
             return;
         }
-
         if (status.equalsIgnoreCase("on")) {
             faction.setPvpEnabled(true);
             leader.sendMessage("§cPVP entre membros da faccao agora esta ATIVADO.");
@@ -434,7 +387,7 @@ public class FactionManager {
         }
         saveFactionToFile(faction);
     }
-    
+
     public void setFactionTag(Player leader, String newTag) {
         Faction faction = getPlayerFaction(leader.getName());
         if (faction == null) {
@@ -453,15 +406,13 @@ public class FactionManager {
             leader.sendMessage("§cA tag '" + newTag + "' ja esta em uso.");
             return;
         }
-
         faction.setTag(newTag);
         saveFactionToFile(faction);
         leader.sendMessage("§aA tag da sua faccao foi alterada para [" + newTag + "].");
     }
-    
+
     private void dissolveFaction(Faction faction, Player leader) {
         factions.remove(faction.getName().toLowerCase());
-        
         playerToFactionMap.remove(leader.getName().toLowerCase());
         for (String official : faction.getOfficials()) {
             playerToFactionMap.remove(official.toLowerCase());
@@ -472,12 +423,10 @@ public class FactionManager {
          if (!faction.getTreasuryPlayer().isEmpty()) {
             playerToFactionMap.remove(faction.getTreasuryPlayer().toLowerCase());
         }
-
         File factionFile = new File(plugin.getDataFolder() + "/factions", faction.getName().toLowerCase() + ".yml");
         if (factionFile.exists()) {
             factionFile.delete();
         }
-
         leader.sendMessage("§cComo lider, voce dissolveu a faccao " + faction.getName() + ".");
     }
 
@@ -489,20 +438,19 @@ public class FactionManager {
         }
         return false;
     }
-    
+
     public void saveFactionToFile(Faction faction) {
         File factionFile = new File(plugin.getDataFolder() + "/factions", faction.getName().toLowerCase() + ".yml");
         Configuration factionConfig = new Configuration(factionFile);
-
         factionConfig.setProperty("nome", faction.getName());
         factionConfig.setProperty("tag", faction.getTag());
+        factionConfig.setProperty("cor", faction.getColorHex());
         factionConfig.setProperty("lider", faction.getLeader());
         factionConfig.setProperty("oficiais", faction.getOfficials());
         factionConfig.setProperty("membros", faction.getMembers());
         factionConfig.setProperty("fundo", faction.getTreasuryPlayer());
         factionConfig.setProperty("net_worth", faction.getNetWorth());
         factionConfig.setProperty("pvp-habilitado", faction.isPvpEnabled());
-
         factionConfig.save();
     }
 
@@ -512,29 +460,23 @@ public class FactionManager {
             factionsDir.mkdirs();
             return;
         }
-
         File[] files = factionsDir.listFiles();
         if (files == null) return;
-
         for (File factionFile : files) {
             if (factionFile.getName().endsWith(".yml")) {
                 Configuration factionConfig = new Configuration(factionFile);
                 factionConfig.load();
-
                 String name = factionConfig.getString("nome");
                 String tag = factionConfig.getString("tag");
                 String leader = factionConfig.getString("lider");
-
                 if (name == null || tag == null || leader == null) continue;
-
                 Faction faction = new Faction(name, tag, leader);
-                
+                faction.setColorHex(factionConfig.getString("cor", "#FFFFFF"));
                 faction.getOfficials().addAll(factionConfig.getStringList("oficiais", new ArrayList<String>()));
                 faction.getMembers().addAll(factionConfig.getStringList("membros", new ArrayList<String>()));
                 faction.setTreasuryPlayer(factionConfig.getString("fundo", ""));
                 faction.setNetWorth(factionConfig.getDouble("net_worth", 0.0));
                 faction.setPvpEnabled(factionConfig.getBoolean("pvp-habilitado", false));
-
                 factions.put(name.toLowerCase(), faction);
                 playerToFactionMap.put(leader.toLowerCase(), name);
                 for (String official : faction.getOfficials()) {

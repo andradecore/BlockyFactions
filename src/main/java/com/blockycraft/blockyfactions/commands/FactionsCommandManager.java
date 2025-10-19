@@ -39,8 +39,38 @@ public class FactionsCommandManager implements CommandExecutor {
         }
 
         String subCommand = args[0].toLowerCase();
-        
-        if (subCommand.equals("list")) {
+
+        if (subCommand.equals("criar")) {
+            if (args.length < 3) {
+                player.sendMessage("§cUse: /fac criar <tag> <nome> [cor]");
+                return true;
+            }
+            String tag = args[1];
+            String name = args[2];
+            if (args.length == 3) {
+                plugin.getFactionManager().createFaction(name, tag, player);
+            } else { // args.length >= 4
+                String color = args[3];
+                plugin.getFactionManager().createFaction(name, tag, player, color);
+            }
+        } else if (subCommand.equals("rank")) {
+            plugin.getFactionManager().reloadAllFactionsNetWorth();
+            List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
+            if (rankedFactions.isEmpty()) {
+                player.sendMessage("§cO ranking de faccoes esta vazio.");
+                return true;
+            }
+            player.sendMessage("§e--- Ranking de Faccoes (por Patrimonio) ---");
+            int rank = 1;
+            for (Faction faction : rankedFactions) {
+                player.sendMessage("§b#" + rank + ". §7[" + faction.getTag() + "] §f" + faction.getName() + " §e- " + faction.getNetWorth() + " barras");
+                rank++;
+                if (rank > 10) {
+                    break;
+                }
+            }
+            player.sendMessage("§e------------------------------------");
+        } else if (subCommand.equals("list")) {
             if (args.length == 1) {
                 Faction playerFaction = plugin.getFactionManager().getPlayerFaction(player.getName());
                 if (playerFaction == null) {
@@ -52,41 +82,6 @@ public class FactionsCommandManager implements CommandExecutor {
                 String factionToList = args[1];
                 plugin.getFactionManager().listFactionInfo(player, factionToList);
             }
-
-        } else if (subCommand.equals("rank")) {
-            plugin.getFactionManager().reloadAllFactionsNetWorth();
-            
-            List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
-            
-            if (rankedFactions.isEmpty()) {
-                player.sendMessage("§cO ranking de faccoes esta vazio.");
-                return true;
-            }
-            
-            player.sendMessage("§e--- Ranking de Faccoes (por Patrimonio) ---");
-            int rank = 1;
-            for (Faction faction : rankedFactions) {
-                player.sendMessage("§b#" + rank + ". §7[" + faction.getTag() + "] §f" + faction.getName() + " §e- " + faction.getNetWorth() + " barras");
-                rank++;
-                if (rank > 10) {
-                    break;
-                }
-            }
-            player.sendMessage("§e------------------------------------");
-
-        } else if (subCommand.equals("criar")) {
-            if (args.length < 3) {
-                player.sendMessage("§cUse: /fac criar <tag> <nome-da-faccao>");
-                return true;
-            }
-            StringBuilder sb = new StringBuilder();
-            for (int i = 2; i < args.length; i++) {
-                sb.append(args[i]).append(" ");
-            }
-            String tag = args[1];
-            String name = sb.toString().trim();
-            plugin.getFactionManager().createFaction(name, tag, player);
-            
         } else if (subCommand.equals("convidar")) {
              if (args.length < 2) {
                 player.sendMessage("§cUse: /fac convidar <jogador>");
@@ -94,7 +89,6 @@ public class FactionsCommandManager implements CommandExecutor {
             }
             String targetName = args[1];
             plugin.getFactionManager().invitePlayer(player, targetName);
-
         } else if (subCommand.equals("entrar")) {
             if (args.length < 2) {
                 player.sendMessage("§cUse: /fac entrar <nome-da-faccao>");
@@ -102,7 +96,6 @@ public class FactionsCommandManager implements CommandExecutor {
             }
             String factionName = args[1];
             plugin.getFactionManager().joinFaction(player, factionName);
-
         } else if (subCommand.equals("expulsar")) {
             if (args.length < 2) {
                 player.sendMessage("§cUse: /fac expulsar <jogador>");
@@ -110,7 +103,6 @@ public class FactionsCommandManager implements CommandExecutor {
             }
             String targetName = args[1];
             plugin.getFactionManager().kickPlayer(player, targetName);
-
         } else if (subCommand.equals("promover")) {
             if (args.length < 3) {
                 player.sendMessage("§cUse: /fac promover <jogador> <oficial|membro>");
@@ -119,42 +111,35 @@ public class FactionsCommandManager implements CommandExecutor {
             String targetName = args[1];
             String rank = args[2];
             plugin.getFactionManager().setPlayerRank(player, targetName, rank);
-        
         } else if (subCommand.equals("pvp")) {
             if (args.length < 2) {
                 player.sendMessage("§cUse: /fac pvp <on|off>");
                 return true;
             }
             plugin.getFactionManager().setFactionPvp(player, args[1]);
-
         } else if (subCommand.equals("fundo")) {
             if (args.length < 2) {
                 player.sendMessage("§cUse: /fac fundo <jogador|nenhum>");
                 return true;
             }
             plugin.getFactionManager().setTreasuryPlayer(player, args[1]);
-
         } else if (subCommand.equals("tag")) {
             if (args.length < 2) {
                 player.sendMessage("§cUse: /fac tag <nova-tag>");
                 return true;
             }
             plugin.getFactionManager().setFactionTag(player, args[1]);
-
         } else if (subCommand.equals("lider")) {
             if (args.length < 2) {
                 player.sendMessage("§cUse: /fac lider <jogador>");
                 return true;
             }
             plugin.getFactionManager().transferLeadership(player, args[1]);
-        
         } else if (subCommand.equals("sair")) {
             plugin.getFactionManager().leaveFaction(player);
-
         } else {
             player.sendMessage("§cComando desconhecido. Use /fac para ver a lista de comandos.");
         }
-
         return true;
     }
 
@@ -163,7 +148,7 @@ public class FactionsCommandManager implements CommandExecutor {
             case 1:
                 player.sendMessage("§e--- Ajuda do BlockyFaccao (Pagina 1/2) ---");
                 player.sendMessage("§b/fac [pagina] §7- Mostra a ajuda.");
-                player.sendMessage("§b/fac criar <tag> <nome> §7- Cria uma nova faccao.");
+                player.sendMessage("§b/fac criar <tag> <nome> [cor] §7- Cria uma faccao.");
                 player.sendMessage("§b/fac sair §7- Sai da sua faccao atual.");
                 player.sendMessage("§b/fac convidar <jogador> §7- Convida um jogador.");
                 player.sendMessage("§b/fac entrar <faccao> §7- Aceita um convite.");
