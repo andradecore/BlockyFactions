@@ -7,8 +7,8 @@ BlockyFactions é um plugin de facções projetado para o servidor BlockyCRAFT. 
 
 ## Funcionamento do Sistema
 - Os jogadores podem criar, entrar e gerenciar suas próprias facções.
-- Sistema de hierarquia com cargos de Líder, Oficial, Fundo e Membro, cada um com diferentes níveis de permissão.
-- A tesouraria da facção é gerenciada por um jogador designado como "Fundo", para quem os recursos podem ser enviados.
+- Sistema de hierarquia com cargos de Líder, Oficial, Tesoureiro e Membro, cada um com diferentes níveis de permissão.
+- A tesouraria da facção é gerenciada por um jogador designado como "Tesoureiro", para quem os recursos podem ser enviados.
 - Um ranking de facções é gerado com base no patrimônio total (`net_worth`), um valor que é atualizado por sistemas externos.
 - Todas as informações da facção, incluindo membros e configurações, são salvas em arquivos `.yml` individuais no servidor.
 
@@ -51,8 +51,8 @@ O BlockyFactions ativa um sistema de **"Trust Automático"** no [BlockyClaim](ht
 - `/fac lider <jogador>`
   Transfere a liderança da facção para outro membro. O antigo líder se torna um membro comum.
 
-- `/fac fundo <jogador|nenhum>`
-  Define um membro como o tesoureiro ("Fundo") da facção. Um jogador não pode ser Fundo e Oficial ao mesmo tempo. Use `nenhum` para deixar o cargo vago.
+- `/fac tesoureiro <jogador|nenhum>`
+  Define um membro como o tesoureiro ("Tesoureiro") da facção. Um jogador não pode ser Tesoureiro e Oficial ao mesmo tempo. Use `nenhum` para deixar o cargo vago.
 
 - `/fac tag <nova-tag>`
   Altera a tag da sua facção (máx. 5 caracteres, sem espaços ou símbolos).
