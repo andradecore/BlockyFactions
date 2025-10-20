@@ -39,4 +39,15 @@ public class BlockyFactionsAPI {
 
         return treasuryPlayer;
     }
+
+
+    public static String getPlayerFactionTag(String playerName) {
+        if (plugin == null) return null;
+
+        Faction faction = plugin.getFactionManager().getPlayerFaction(playerName);
+        if (faction == null) {
+            return null;
+        }
+        return faction.getTag();
+    }
 }
