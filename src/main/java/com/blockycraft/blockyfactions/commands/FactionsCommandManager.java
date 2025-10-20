@@ -145,7 +145,7 @@ public class FactionsCommandManager implements CommandExecutor {
     private void showHelp(Player player, int page) {
         switch (page) {
             case 1:
-                player.sendMessage("§f--- Comandos de Faccoes ---");
+                player.sendMessage("§f--- Comandos de §aFaccoes §f---");
                 player.sendMessage("§b/fac [pagina] §7- Mostra a ajuda.");
                 player.sendMessage("§b/fac criar <tag> <nome> [cor] §7- Cria uma faccao.");
                 player.sendMessage("§b/fac sair §7- Sai da sua faccao atual.");
@@ -156,7 +156,7 @@ public class FactionsCommandManager implements CommandExecutor {
                 player.sendMessage("§7--- §fPagina §e1§f/§e2 §f--- §fUse §b/fac <pagina> §fpara navegar");
                 break;
             case 2:
-                player.sendMessage("§f--- Ajuda do BlockyFaccao ---");
+                player.sendMessage("§f--- Comandos de §aFaccoes §f---");
                 player.sendMessage("§f-- Comandos de Lider/Oficial --");
                 player.sendMessage("§b/fac expulsar <jogador> §7- Expulsa um membro.");
                 player.sendMessage("§f-- Comandos de Lider --");
