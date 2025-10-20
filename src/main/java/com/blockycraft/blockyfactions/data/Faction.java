@@ -36,7 +36,7 @@ public class Faction {
     public String getTreasuryPlayer() { return treasuryPlayer; }
     public double getNetWorth() { return netWorth; }
     public boolean isPvpEnabled() { return pvpEnabled; }
-    public String getColorHex() { return colorHex; } // NOVO GETTER
+    public String getColorHex() { return colorHex; }
 
     // Setters
     public void setTag(String tag) { this.tag = tag; }
@@ -44,7 +44,7 @@ public class Faction {
     public void setTreasuryPlayer(String treasuryPlayer) { this.treasuryPlayer = treasuryPlayer; }
     public void setNetWorth(double netWorth) { this.netWorth = netWorth; }
     public void setPvpEnabled(boolean pvpEnabled) { this.pvpEnabled = pvpEnabled; }
-    public void setColorHex(String colorHex) { this.colorHex = colorHex; } // NOVO SETTER
+    public void setColorHex(String colorHex) { this.colorHex = colorHex; }
     
     public void addMember(String playerName) {
         if (!isMember(playerName)) {
@@ -83,5 +83,23 @@ public class Faction {
                officials.contains(lowerCasePlayerName) || 
                members.contains(lowerCasePlayerName) ||
                treasuryPlayer.equalsIgnoreCase(lowerCasePlayerName);
+    }
+
+    /**
+     * Calcula o número total de jogadores na facção, contando todos os cargos.
+     * Isso inclui: 1 Líder + Oficiais + Membros + 1 Tesoureiro (se definido).
+     * @return O tamanho total da facção.
+     */
+    public int getSize() {
+        int size = 1; // 1 para o líder
+        size += officials.size();
+        size += members.size();
+
+        // Adiciona o tesoureiro à contagem, se houver um
+        if (treasuryPlayer != null && !treasuryPlayer.isEmpty()) {
+            size++;
+        }
+        
+        return size;
     }
 }

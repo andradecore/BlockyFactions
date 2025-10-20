@@ -151,6 +151,12 @@ public class FactionManager {
             inviter.sendMessage("§bVoce nao esta em uma faccao para poder convidar alguem.");
             return;
         }
+
+        if (faction.getSize() >= plugin.getMaxMembers()) {
+            inviter.sendMessage("§bSua faccao atingiu o limite maximo de " + plugin.getMaxMembers() + " membros e nao pode convidar mais ninguem.");
+            return;
+        }
+
         String inviterName = inviter.getName().toLowerCase();
         if (!faction.getLeader().equalsIgnoreCase(inviterName) && !faction.getOfficials().contains(inviterName)) {
             inviter.sendMessage("§bVoce precisa ser o lider ou um oficial para convidar jogadores.");
@@ -188,6 +194,13 @@ public class FactionManager {
             pendingInvites.remove(playerName);
             return;
         }
+
+        if (faction.getSize() >= plugin.getMaxMembers()) {
+            player.sendMessage("§bA faccao '" + faction.getName() + "' esta cheia e nao e possivel entrar.");
+            pendingInvites.remove(playerName);
+            return;
+        }
+
         pendingInvites.remove(playerName);
         faction.addMember(player.getName());
         playerToFactionMap.put(playerName, faction.getName());
@@ -226,11 +239,8 @@ public class FactionManager {
         String members = String.join(", ", plainMembers);
         if (members.isEmpty()) { members = "Nenhum"; }
         viewer.sendMessage("§bMembros (" + plainMembers.size() + "): §f" + members);
-        int totalMembers = 1 + faction.getOfficials().size() + plainMembers.size();
-        if (treasuryPlayer != null && !treasuryPlayer.isEmpty()) { 
-            totalMembers++; 
-        }
-        viewer.sendMessage("§bTotal de Membros: §f" + totalMembers);
+        
+        viewer.sendMessage("§bTotal de Membros: §f" + faction.getSize() + "/" + plugin.getMaxMembers());
         viewer.sendMessage("§f--------------------------");
     }
 

@@ -1,0 +1,6 @@
+# Arquivo de configuracao para o BlockyFactions
+
+factions:
+  # Define o numero maximo de jogadores que uma faccao pode ter.
+  # Isso inclui o lider, oficiais, membros e o tesoureiro.
+  max-members: 6
