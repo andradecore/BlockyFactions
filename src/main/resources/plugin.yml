@@ -2,15 +2,112 @@ name: BlockyFactions
 main: com.blockycraft.blockyfactions.BlockyFactions
 version: 1.0.0
 author: Bernardo Zukerman
-description: Plugin de faccoes com integracao ao BlockyClaim.
+description: Sistema de Faccoes simples para servidores Beta 1.7.3.
 
-permissions:
-  blockyfactions.fac:
-    description: Permite o uso de todos os comandos do /fac.
-    default: true
+loadbefore:
+  - BlockyWar
+  - BlockyChat
+  - BlockyClaim
+  - BlockyDynmap
+  - dynmap
 
 commands:
   fac:
-    description: Comando principal para gerenciar faccoes.
-    usage: /fac [pagina]
-    permission: blockyfactions.fac
+    description: Gerencia Faccoes.
+    aliases: [f, faccao]
+    usage: |
+      Use /fac [pagina] para ajuda.
+
+permissions:
+  blockyfactions.user:
+    description: Permissoes basicas para Faccoes (entrar, sair, ver info).
+    default: true
+    children:
+      blockyfactions.join: true
+      blockyfactions.leave: true
+      blockyfactions.list: true
+      blockyfactions.rank: true
+
+  blockyfactions.member:
+    description: Permissoes para membros de Faccoes (convidar).
+    default: op 
+    children:
+      blockyfactions.user: true
+      # blockyfactions.invite: true # Movido para oficial/lider
+
+  blockyfactions.official:
+    description: Permissoes para Oficiais de Faccoes (convidar, expulsar membros).
+    default: op
+    children:
+       blockyfactions.member: true 
+       blockyfactions.invite: true
+       blockyfactions.kick.member: true 
+
+  blockyfactions.leader:
+    description: Permissoes totais para Lideres de Faccoes.
+    default: op
+    children:
+       blockyfactions.official: true 
+       blockyfactions.create: true
+       blockyfactions.kick.official: true 
+       blockyfactions.promote: true
+       blockyfactions.demote: true
+       blockyfactions.setpvp: true
+       blockyfactions.settag: true
+       blockyfactions.settreasury: true
+       blockyfactions.transfer: true
+       # blockyfactions.disband: true # Dissolucao e automatica
+
+  blockyfactions.admin:
+    description: Permissoes administrativas para BlockyFactions.
+    default: op
+    children:
+       blockyfactions.leader: true 
+       blockyfactions.reload: true 
+
+  # Permissoes individuais
+  blockyfactions.create:
+    description: Permite criar uma nova faccao (/fac criar).
+    default: true 
+  blockyfactions.join:
+    description: Permite aceitar um convite (/fac entrar).
+    default: true
+  blockyfactions.leave:
+    description: Permite sair da faccao atual (/fac sair).
+    default: true
+  blockyfactions.list:
+    description: Permite ver informacoes de faccoes (/fac list).
+    default: true
+  blockyfactions.rank:
+    description: Permite ver o ranking de faccoes (/fac rank).
+    default: true
+  blockyfactions.invite:
+    description: Permite convidar jogadores (/fac convidar).
+    default: false 
+  blockyfactions.kick.member:
+    description: Permite expulsar membros normais (/fac expulsar).
+    default: false 
+  blockyfactions.kick.official:
+    description: Permite expulsar oficiais (/fac expulsar).
+    default: false 
+  blockyfactions.promote:
+    description: Permite promover/rebaixar membros (/fac promover).
+    default: false 
+  blockyfactions.demote:
+    description: Permite rebaixar oficiais (/fac promover). Alias de promote.
+    default: false 
+  blockyfactions.setpvp:
+    description: Permite alterar o status PVP interno (/fac pvp).
+    default: false 
+  blockyfactions.settag:
+    description: Permite alterar a tag da faccao (/fac tag).
+    default: false 
+  blockyfactions.settreasury:
+    description: Permite definir o tesoureiro (/fac tesoureiro).
+    default: false 
+  blockyfactions.transfer:
+    description: Permite transferir a lideranca (/fac lider).
+    default: false 
+  blockyfactions.reload:
+    description: Permite recarregar a configuracao (/fac reload).
+    default: op
