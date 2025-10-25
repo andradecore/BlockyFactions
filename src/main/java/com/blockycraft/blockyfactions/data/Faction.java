@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Faction {
-
+    
     private String name;
     private String tag;
     private String leader;
@@ -13,8 +13,8 @@ public class Faction {
     private String treasuryPlayer;
     private double netWorth;
     private boolean pvpEnabled;
-    private String colorHex; // NOVO CAMPO
-
+    private String colorHex;
+    
     public Faction(String name, String tag, String leader) {
         this.name = name;
         this.tag = tag;
@@ -24,9 +24,9 @@ public class Faction {
         this.treasuryPlayer = "";
         this.netWorth = 0.0;
         this.pvpEnabled = false;
-        this.colorHex = "#FFFFFF"; // Cor padrão de fallback
+        this.colorHex = "#FFFFFF";
     }
-
+    
     // Getters
     public String getName() { return name; }
     public String getTag() { return tag; }
@@ -37,7 +37,7 @@ public class Faction {
     public double getNetWorth() { return netWorth; }
     public boolean isPvpEnabled() { return pvpEnabled; }
     public String getColorHex() { return colorHex; }
-
+    
     // Setters
     public void setTag(String tag) { this.tag = tag; }
     public void setLeader(String leader) { this.leader = leader; }
@@ -47,11 +47,12 @@ public class Faction {
     public void setColorHex(String colorHex) { this.colorHex = colorHex; }
     
     public void addMember(String playerName) {
+        String lowerCasePlayerName = playerName.toLowerCase();
         if (!isMember(playerName)) {
-            members.add(playerName.toLowerCase());
+            members.add(lowerCasePlayerName);
         }
     }
-
+    
     public void removeMember(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
         members.remove(lowerCasePlayerName);
@@ -63,20 +64,28 @@ public class Faction {
     
     public void promotePlayer(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
-        if (members.contains(lowerCasePlayerName) && !officials.contains(lowerCasePlayerName)) {
+        
+        // Remove de membros se estiver lá
+        members.remove(lowerCasePlayerName);
+        
+        // Adiciona aos oficiais se não estiver
+        if (!officials.contains(lowerCasePlayerName)) {
             officials.add(lowerCasePlayerName);
-            members.remove(lowerCasePlayerName);
         }
     }
     
     public void demotePlayer(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
-        if (officials.contains(lowerCasePlayerName)) {
-            officials.remove(lowerCasePlayerName);
+        
+        // Remove dos oficiais
+        officials.remove(lowerCasePlayerName);
+        
+        // Adiciona aos membros se não estiver
+        if (!members.contains(lowerCasePlayerName)) {
             members.add(lowerCasePlayerName);
         }
     }
-
+    
     public boolean isMember(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
         return leader.equalsIgnoreCase(lowerCasePlayerName) || 
@@ -84,7 +93,13 @@ public class Faction {
                members.contains(lowerCasePlayerName) ||
                treasuryPlayer.equalsIgnoreCase(lowerCasePlayerName);
     }
-
+    
+    public boolean isLeaderOrOfficer(String playerName) {
+        String lowerCasePlayerName = playerName.toLowerCase();
+        return leader.equalsIgnoreCase(lowerCasePlayerName) || 
+               officials.contains(lowerCasePlayerName);
+    }
+    
     /**
      * Calcula o número total de jogadores na facção, contando todos os cargos.
      * Isso inclui: 1 Líder + Oficiais + Membros + 1 Tesoureiro (se definido).
@@ -94,7 +109,6 @@ public class Faction {
         int size = 1; // 1 para o líder
         size += officials.size();
         size += members.size();
-
         // Adiciona o tesoureiro à contagem, se houver um
         if (treasuryPlayer != null && !treasuryPlayer.isEmpty()) {
             size++;
