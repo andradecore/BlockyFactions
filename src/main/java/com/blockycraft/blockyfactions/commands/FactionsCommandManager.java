@@ -1,6 +1,7 @@
 package com.blockycraft.blockyfactions.commands;
 
 import com.blockycraft.blockyfactions.BlockyFactions;
+import com.blockycraft.blockyfactions.config.ConfigManager;
 import com.blockycraft.blockyfactions.data.Faction;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,15 +13,17 @@ import java.util.List;
 public class FactionsCommandManager implements CommandExecutor {
     
     private final BlockyFactions plugin;
+    private final ConfigManager config;
     
     public FactionsCommandManager(BlockyFactions plugin) {
         this.plugin = plugin;
+        this.config = plugin.getConfigManager();
     }
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Este comando so pode ser utilizado por jogadores.");
+            sender.sendMessage(config.getMessage("error.only-players"));
             return true;
         }
         
@@ -42,7 +45,7 @@ public class FactionsCommandManager implements CommandExecutor {
         
         if (subCommand.equals("criar")) {
             if (args.length < 3) {
-                player.sendMessage("§bUse: /fac criar <tag> <nome> [cor]");
+                player.sendMessage(config.getMessage("usage.criar"));
                 return true;
             }
             String tag = args[1];
@@ -59,25 +62,25 @@ public class FactionsCommandManager implements CommandExecutor {
             List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
             
             if (rankedFactions.isEmpty()) {
-                player.sendMessage("§bO ranking de faccoes esta vazio.");
+                player.sendMessage(config.getMessage("error.ranking-empty"));
                 return true;
             }
             
-            player.sendMessage("§f--- Ranking por Patrimonio ---");
+            player.sendMessage(config.getRankMessage("header"));
             int rank = 1;
             for (Faction faction : rankedFactions) {
-                player.sendMessage("§b#" + rank + ". §7[" + faction.getTag() + "] §f" + faction.getName() + " §f- " + faction.getNetWorth() + " barras");
+                player.sendMessage(config.getRankMessage("entry", rank, faction.getTag(), faction.getName(), faction.getNetWorth()));
                 rank++;
                 if (rank > 10) {
                     break;
                 }
             }
-            player.sendMessage("§f------------------------------------");
+            player.sendMessage(config.getRankMessage("footer"));
         } else if (subCommand.equals("list")) {
             if (args.length == 1) {
                 Faction playerFaction = plugin.getFactionManager().getPlayerFaction(player.getName());
                 if (playerFaction == null) {
-                    player.sendMessage("§bVoce nao esta em uma faccao. Use /fac list <nome> para ver informacoes de outra faccao.");
+                    player.sendMessage(config.getMessage("usage.list-other"));
                     return true;
                 }
                 plugin.getFactionManager().listFactionInfo(player, playerFaction.getName());
@@ -87,28 +90,28 @@ public class FactionsCommandManager implements CommandExecutor {
             }
         } else if (subCommand.equals("convidar")) {
             if (args.length < 2) {
-                player.sendMessage("§bUse: /fac convidar <jogador>");
+                player.sendMessage(config.getMessage("usage.convidar"));
                 return true;
             }
             String targetName = args[1];
             plugin.getFactionManager().invitePlayer(player, targetName);
         } else if (subCommand.equals("entrar")) {
             if (args.length < 2) {
-                player.sendMessage("§bUse: /fac entrar <nome-da-faccao>");
+                player.sendMessage(config.getMessage("usage.entrar"));
                 return true;
             }
             String factionName = args[1];
             plugin.getFactionManager().joinFaction(player, factionName);
         } else if (subCommand.equals("expulsar")) {
             if (args.length < 2) {
-                player.sendMessage("§bUse: /fac expulsar <jogador>");
+                player.sendMessage(config.getMessage("usage.expulsar"));
                 return true;
             }
             String targetName = args[1];
             plugin.getFactionManager().kickPlayer(player, targetName);
         } else if (subCommand.equals("promover")) {
             if (args.length < 3) {
-                player.sendMessage("§bUse: /fac promover <jogador> <membro|oficial|tesoureiro|lider>");
+                player.sendMessage(config.getMessage("usage.promover"));
                 return true;
             }
             String targetName = args[1];
@@ -116,20 +119,20 @@ public class FactionsCommandManager implements CommandExecutor {
             plugin.getFactionManager().setPlayerRank(player, targetName, rank);
         } else if (subCommand.equals("pvp")) {
             if (args.length < 2) {
-                player.sendMessage("§bUse: /fac pvp <on|off>");
+                player.sendMessage(config.getMessage("usage.pvp"));
                 return true;
             }
             plugin.getFactionManager().setFactionPvp(player, args[1]);
         } else if (subCommand.equals("tag")) {
             if (args.length < 2) {
-                player.sendMessage("§bUse: /fac tag <nova-tag>");
+                player.sendMessage(config.getMessage("usage.tag"));
                 return true;
             }
             plugin.getFactionManager().setFactionTag(player, args[1]);
         } else if (subCommand.equals("sair")) {
             plugin.getFactionManager().leaveFaction(player);
         } else {
-            player.sendMessage("§bComando desconhecido. Use /fac para ver a lista de comandos.");
+            player.sendMessage(config.getMessage("error.unknown-command"));
         }
         
         return true;
@@ -138,29 +141,29 @@ public class FactionsCommandManager implements CommandExecutor {
     private void showHelp(Player player, int page) {
         switch (page) {
             case 1:
-                player.sendMessage("§f--- Comandos de §aFaccoes §f---");
-                player.sendMessage("§b/fac [pagina] §7- Mostra a ajuda.");
-                player.sendMessage("§b/fac criar <tag> <nome> [cor] §7- Cria uma faccao.");
-                player.sendMessage("§b/fac sair §7- Sai da sua faccao atual.");
-                player.sendMessage("§b/fac convidar <jogador> §7- Convida um jogador.");
-                player.sendMessage("§b/fac entrar <nome-da-faccao> §7- Aceita um convite.");
-                player.sendMessage("§b/fac list [faccao] §7- Mostra informacoes.");
-                player.sendMessage("§b/fac rank §7- Mostra o ranking de faccoes.");
-                player.sendMessage("§7--- §fPagina §e1§f/§e2 §f--- §fUse §b/fac <numero> §fpara navegar");
+                player.sendMessage(config.getHelpMessage("page1.header"));
+                player.sendMessage(config.getHelpMessage("page1.help"));
+                player.sendMessage(config.getHelpMessage("page1.criar"));
+                player.sendMessage(config.getHelpMessage("page1.sair"));
+                player.sendMessage(config.getHelpMessage("page1.convidar"));
+                player.sendMessage(config.getHelpMessage("page1.entrar"));
+                player.sendMessage(config.getHelpMessage("page1.list"));
+                player.sendMessage(config.getHelpMessage("page1.rank"));
+                player.sendMessage(config.getHelpMessage("page1.footer"));
                 break;
             case 2:
-                player.sendMessage("§f--- Comandos de §aFaccoes §f---");
-                player.sendMessage("§f-- Comandos de Lider/Oficial --");
-                player.sendMessage("§b/fac expulsar <jogador> §7- Expulsa um membro.");
-                player.sendMessage("§f-- Comandos de Lider --");
-                player.sendMessage("§b/fac promover <jogador> <cargo> §7- Altera o cargo.");
-                player.sendMessage("§7  Cargos: membro, oficial, tesoureiro, lider");
-                player.sendMessage("§b/fac tag <nova-tag> §7- Altera a tag da faccao.");
-                player.sendMessage("§b/fac pvp <on|off> §7- Ativa/desativa o pvp interno.");
-                player.sendMessage("§7--- §fPagina §e2§f/§e2 §f--- §fUse §b/fac <numero> §fpara navegar");
+                player.sendMessage(config.getHelpMessage("page2.header"));
+                player.sendMessage(config.getHelpMessage("page2.section-officer"));
+                player.sendMessage(config.getHelpMessage("page2.expulsar"));
+                player.sendMessage(config.getHelpMessage("page2.section-leader"));
+                player.sendMessage(config.getHelpMessage("page2.promover"));
+                player.sendMessage(config.getHelpMessage("page2.promover-info"));
+                player.sendMessage(config.getHelpMessage("page2.tag"));
+                player.sendMessage(config.getHelpMessage("page2.pvp"));
+                player.sendMessage(config.getHelpMessage("page2.footer"));
                 break;
             default:
-                player.sendMessage("§bPagina de ajuda nao encontrada. Paginas disponiveis: 1 e 2.");
+                player.sendMessage(config.getMessage("error.page-not-found"));
                 break;
         }
     }
