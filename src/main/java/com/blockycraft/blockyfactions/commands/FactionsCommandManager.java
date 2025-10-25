@@ -145,7 +145,6 @@ public class FactionsCommandManager implements CommandExecutor {
                 player.sendMessage(config.getHelpMessage("page1.help"));
                 player.sendMessage(config.getHelpMessage("page1.criar"));
                 player.sendMessage(config.getHelpMessage("page1.sair"));
-                player.sendMessage(config.getHelpMessage("page1.convidar"));
                 player.sendMessage(config.getHelpMessage("page1.entrar"));
                 player.sendMessage(config.getHelpMessage("page1.list"));
                 player.sendMessage(config.getHelpMessage("page1.rank"));
@@ -154,6 +153,7 @@ public class FactionsCommandManager implements CommandExecutor {
             case 2:
                 player.sendMessage(config.getHelpMessage("page2.header"));
                 player.sendMessage(config.getHelpMessage("page2.section-officer"));
+                player.sendMessage(config.getHelpMessage("page2.convidar"));
                 player.sendMessage(config.getHelpMessage("page2.expulsar"));
                 player.sendMessage(config.getHelpMessage("page2.section-leader"));
                 player.sendMessage(config.getHelpMessage("page2.promover"));
