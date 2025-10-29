@@ -11,38 +11,84 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class FactionsCommandManager implements CommandExecutor {
-    
+
     private final BlockyFactions plugin;
     private final ConfigManager config;
-    
+
     public FactionsCommandManager(BlockyFactions plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfigManager();
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // --- COMANDO /fc ---
+        if (label.equalsIgnoreCase("fc")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(config.getMessage("error.only-players"));
+                return true;
+            }
+            Player player = (Player) sender;
+            Faction faction = plugin.getFactionManager().getPlayerFaction(player.getName());
+            if (faction == null) {
+                player.sendMessage("§cVoce nao pertence a nenhuma faccao.");
+                return true;
+            }
+            if (args.length == 0) {
+                player.sendMessage("§bUse: /fc <mensagem>");
+                return true;
+            }
+            String mensagem = String.join(" ", args);
+            String formatada = "§f[§bPrivado§f]§9 " + player.getName() + ":§b " + mensagem;
+
+            // Junta todos os membros para evitar duplicidade (membros, oficiais, líder, tesoureiro)
+            java.util.HashSet<String> membros = new java.util.HashSet<>();
+            membros.addAll(faction.getMembers());
+            membros.addAll(faction.getOfficials());
+            membros.add(faction.getLeader());
+            String tesoureiro = faction.getTreasuryPlayer();
+            if (tesoureiro != null && !tesoureiro.isEmpty()) {
+                membros.add(tesoureiro);
+            }
+
+            boolean enviado = false;
+            for (String nick : membros) {
+                Player p = plugin.getServer().getPlayer(nick);
+                if (p != null && p.isOnline()) {
+                    p.sendMessage(formatada);
+                    enviado = true;
+                }
+            }
+            if (!enviado) {
+                player.sendMessage("§cNenhum outro membro da sua faccao esta online para receber a mensagem.");
+            }
+            return true;
+        }
+
+        // ------ DEMAIS SUBCOMANDOS JÁ EXISTENTES DO /fac --------
+
         if (!(sender instanceof Player)) {
             sender.sendMessage(config.getMessage("error.only-players"));
             return true;
         }
-        
+
         Player player = (Player) sender;
-        
+
         if (args.length == 0) {
             showHelp(player, 1);
             return true;
         }
-        
+
         try {
             int page = Integer.parseInt(args[0]);
             showHelp(player, page);
             return true;
         } catch (NumberFormatException e) {
+            // Not a page, fallthrough
         }
-        
+
         String subCommand = args[0].toLowerCase();
-        
+
         if (subCommand.equals("criar")) {
             if (args.length < 3) {
                 player.sendMessage(config.getMessage("usage.criar"));
@@ -50,7 +96,7 @@ public class FactionsCommandManager implements CommandExecutor {
             }
             String tag = args[1];
             String name = args[2];
-            
+
             if (args.length == 3) {
                 plugin.getFactionManager().createFaction(name, tag, player);
             } else {
@@ -60,12 +106,12 @@ public class FactionsCommandManager implements CommandExecutor {
         } else if (subCommand.equals("rank")) {
             plugin.getFactionManager().reloadAllFactionsNetWorth();
             List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
-            
+
             if (rankedFactions.isEmpty()) {
                 player.sendMessage(config.getMessage("error.ranking-empty"));
                 return true;
             }
-            
+
             player.sendMessage(config.getRankMessage("header"));
             int rank = 1;
             for (Faction faction : rankedFactions) {
@@ -134,16 +180,17 @@ public class FactionsCommandManager implements CommandExecutor {
         } else {
             player.sendMessage(config.getMessage("error.unknown-command"));
         }
-        
+
         return true;
     }
-    
+
     private void showHelp(Player player, int page) {
         switch (page) {
             case 1:
                 player.sendMessage(config.getHelpMessage("page1.header"));
                 player.sendMessage(config.getHelpMessage("page1.help"));
                 player.sendMessage(config.getHelpMessage("page1.criar"));
+                player.sendMessage(config.getHelpMessage("page1.fc")); // <- adicione esta linha
                 player.sendMessage(config.getHelpMessage("page1.sair"));
                 player.sendMessage(config.getHelpMessage("page1.entrar"));
                 player.sendMessage(config.getHelpMessage("page1.list"));

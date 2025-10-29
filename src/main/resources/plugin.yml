@@ -3,14 +3,16 @@ main: com.blockycraft.blockyfactions.BlockyFactions
 version: 1.0.0
 author: Bernardo Zukerman
 description: Plugin de faccoes com integracao ao BlockyClaim.
-
 permissions:
   blockyfactions.fac:
     description: Permite o uso de todos os comandos do /fac.
     default: true
-
 commands:
   fac:
     description: Comando principal para gerenciar faccoes.
     usage: /fac [pagina]
+    permission: blockyfactions.fac
+  fc:
+    description: Envia uma mensagem apenas para membros da sua facção.
+    usage: /fc <mensagem>
     permission: blockyfactions.fac
