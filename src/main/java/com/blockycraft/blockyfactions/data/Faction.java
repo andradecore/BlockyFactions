@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Faction {
-    
+
     private String name;
     private String tag;
     private String leader;
@@ -14,19 +14,23 @@ public class Faction {
     private double netWorth;
     private boolean pvpEnabled;
     private String colorHex;
-    
+
+    /** NOVO CAMPO: localização da base (World;x;y;z;yaw;pitch) */
+    private String baseLocation = "";
+
     public Faction(String name, String tag, String leader) {
         this.name = name;
         this.tag = tag;
         this.leader = leader;
-        this.officials = new ArrayList<String>();
-        this.members = new ArrayList<String>();
+        this.officials = new ArrayList<>();
+        this.members = new ArrayList<>();
         this.treasuryPlayer = "";
         this.netWorth = 0.0;
         this.pvpEnabled = false;
         this.colorHex = "#FFFFFF";
+        this.baseLocation = "";
     }
-    
+
     // Getters
     public String getName() { return name; }
     public String getTag() { return tag; }
@@ -37,7 +41,8 @@ public class Faction {
     public double getNetWorth() { return netWorth; }
     public boolean isPvpEnabled() { return pvpEnabled; }
     public String getColorHex() { return colorHex; }
-    
+    public String getBaseLocation() { return baseLocation; }
+
     // Setters
     public void setTag(String tag) { this.tag = tag; }
     public void setLeader(String leader) { this.leader = leader; }
@@ -45,14 +50,15 @@ public class Faction {
     public void setNetWorth(double netWorth) { this.netWorth = netWorth; }
     public void setPvpEnabled(boolean pvpEnabled) { this.pvpEnabled = pvpEnabled; }
     public void setColorHex(String colorHex) { this.colorHex = colorHex; }
-    
+    public void setBaseLocation(String baseLocation) { this.baseLocation = baseLocation; }
+
     public void addMember(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
         if (!isMember(playerName)) {
             members.add(lowerCasePlayerName);
         }
     }
-    
+
     public void removeMember(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
         members.remove(lowerCasePlayerName);
@@ -61,59 +67,48 @@ public class Faction {
             treasuryPlayer = "";
         }
     }
-    
+
     public void promotePlayer(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
-        
-        // Remove de membros se estiver lá
         members.remove(lowerCasePlayerName);
-        
-        // Adiciona aos oficiais se não estiver
         if (!officials.contains(lowerCasePlayerName)) {
             officials.add(lowerCasePlayerName);
         }
     }
-    
+
     public void demotePlayer(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
-        
-        // Remove dos oficiais
         officials.remove(lowerCasePlayerName);
-        
-        // Adiciona aos membros se não estiver
         if (!members.contains(lowerCasePlayerName)) {
             members.add(lowerCasePlayerName);
         }
     }
-    
+
     public boolean isMember(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
-        return leader.equalsIgnoreCase(lowerCasePlayerName) || 
-               officials.contains(lowerCasePlayerName) || 
-               members.contains(lowerCasePlayerName) ||
-               treasuryPlayer.equalsIgnoreCase(lowerCasePlayerName);
+        return leader.equalsIgnoreCase(lowerCasePlayerName) ||
+                officials.contains(lowerCasePlayerName) ||
+                members.contains(lowerCasePlayerName) ||
+                treasuryPlayer.equalsIgnoreCase(lowerCasePlayerName);
     }
-    
+
     public boolean isLeaderOrOfficer(String playerName) {
         String lowerCasePlayerName = playerName.toLowerCase();
-        return leader.equalsIgnoreCase(lowerCasePlayerName) || 
-               officials.contains(lowerCasePlayerName);
+        return leader.equalsIgnoreCase(lowerCasePlayerName) ||
+                officials.contains(lowerCasePlayerName);
     }
-    
+
     /**
-     * Calcula o número total de jogadores na facção, contando todos os cargos.
-     * Isso inclui: 1 Líder + Oficiais + Membros + 1 Tesoureiro (se definido).
-     * @return O tamanho total da facção.
+     * Calcula o número total de jogadores, contando todos os cargos.
+     * Inclui: 1 Líder + Oficiais + Membros + 1 Tesoureiro (se definido).
      */
     public int getSize() {
         int size = 1; // 1 para o líder
         size += officials.size();
         size += members.size();
-        // Adiciona o tesoureiro à contagem, se houver um
         if (treasuryPlayer != null && !treasuryPlayer.isEmpty()) {
             size++;
         }
-        
         return size;
     }
 }

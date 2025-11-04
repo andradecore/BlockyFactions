@@ -526,11 +526,23 @@ public class FactionManager {
         }
         return false;
     }
+
+    public void setFactionBase(com.blockycraft.blockyfactions.data.Faction faction, String baseLocation) {
+        if (faction == null) return;
+        faction.setBaseLocation(baseLocation);
+        saveFactionToFile(faction);
+    }
+
+    // NOVO MÉTODO: Retorna localização da base
+    public String getFactionBaseLocation(com.blockycraft.blockyfactions.data.Faction faction) {
+        if (faction == null) return "";
+        return faction.getBaseLocation();
+    }
     
     public void saveFactionToFile(Faction faction) {
         File factionFile = new File(plugin.getDataFolder() + "/factions", faction.getName().toLowerCase() + ".yml");
         Configuration factionConfig = new Configuration(factionFile);
-        
+
         factionConfig.setProperty("nome", faction.getName());
         factionConfig.setProperty("tag", faction.getTag());
         factionConfig.setProperty("cor", faction.getColorHex());
@@ -539,39 +551,41 @@ public class FactionManager {
         factionConfig.setProperty("membros", faction.getMembers());
         factionConfig.setProperty("tesoureiro", faction.getTreasuryPlayer());
         factionConfig.setProperty("net_worth", faction.getNetWorth());
-        factionConfig.setProperty("pvp-habilitado", faction.isPvpEnabled());
-        
+        factionConfig.setProperty("pvp_habilitado", faction.isPvpEnabled());
+        factionConfig.setProperty("base", faction.getBaseLocation()); // NOVO: localização da base
+
         factionConfig.save();
     }
-    
+
     public void loadFactions() {
         File factionsDir = new File(plugin.getDataFolder(), "factions");
         if (!factionsDir.exists()) {
             factionsDir.mkdirs();
             return;
         }
-        
+
         File[] files = factionsDir.listFiles();
         if (files == null) return;
-        
+
         for (File factionFile : files) {
             if (factionFile.getName().endsWith(".yml")) {
                 Configuration factionConfig = new Configuration(factionFile);
                 factionConfig.load();
-                
+
                 String name = factionConfig.getString("nome");
                 String tag = factionConfig.getString("tag");
                 String leader = factionConfig.getString("lider");
-                
+
                 if (name == null || tag == null || leader == null) continue;
-                
+
                 Faction faction = new Faction(name, tag, leader);
                 faction.setColorHex(factionConfig.getString("cor", "#FFFFFF"));
-                faction.getOfficials().addAll(factionConfig.getStringList("oficiais", new ArrayList<String>()));
-                faction.getMembers().addAll(factionConfig.getStringList("membros", new ArrayList<String>()));
+                faction.getOfficials().addAll(factionConfig.getStringList("oficiais", new ArrayList<>()));
+                faction.getMembers().addAll(factionConfig.getStringList("membros", new ArrayList<>()));
                 faction.setTreasuryPlayer(factionConfig.getString("tesoureiro", ""));
                 faction.setNetWorth(factionConfig.getDouble("net_worth", 0.0));
-                faction.setPvpEnabled(factionConfig.getBoolean("pvp-habilitado", false));
+                faction.setPvpEnabled(factionConfig.getBoolean("pvp_habilitado", false));
+                faction.setBaseLocation(factionConfig.getString("base", "")); // NOVO: carrega base
                 
                 factions.put(name.toLowerCase(), faction);
                 playerToFactionMap.put(leader.toLowerCase(), name);
