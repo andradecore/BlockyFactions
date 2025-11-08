@@ -3,6 +3,7 @@ main: com.blockycraft.blockyfactions.BlockyFactions
 version: 1.0.0
 author: Bernardo Zukerman
 description: Plugin de faccoes com integracao ao BlockyClaim.
+depend: [BlockyGeoIP]
 permissions:
   blockyfactions.fac:
     description: Permite o uso de todos os comandos do /fac.
