@@ -3,21 +3,28 @@ package com.blockycraft.blockyfactions;
 import com.blockycraft.blockyfactions.api.BlockyFactionsAPI;
 import com.blockycraft.blockyfactions.commands.FactionsCommandManager;
 import com.blockycraft.blockyfactions.config.ConfigManager;
+import com.blockycraft.blockyfactions.geoip.GeoIPManager;
+import com.blockycraft.blockyfactions.lang.LanguageManager;
 import com.blockycraft.blockyfactions.listeners.FactionPvpListener;
 import com.blockycraft.blockyfactions.managers.FactionManager;
-import org.bukkit.event.Event;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BlockyFactions extends JavaPlugin {
 
     private FactionManager factionManager;
     private ConfigManager configManager;
+    private LanguageManager languageManager;
+    private GeoIPManager geoIPManager;
 
     @Override
     public void onEnable() {
         // Carrega configuracoes
         this.configManager = new ConfigManager(this);
+        this.languageManager = new LanguageManager(this);
+        this.geoIPManager = new GeoIPManager();
 
         // Inicializa managers
         this.factionManager = new FactionManager(this);
@@ -41,11 +48,7 @@ public class BlockyFactions extends JavaPlugin {
     }
 
     private void registerEvents() {
-        PluginManager pm = getServer().getPluginManager();
-        FactionPvpListener pvpListener = new FactionPvpListener(this);
-
-        pm.registerEvent(Event.Type.ENTITY_DAMAGE, pvpListener, Event.Priority.Highest, this);
-
+        getServer().getPluginManager().registerEvents(new FactionPvpListener(this), this);
         System.out.println("[BlockyFactions] Listeners de eventos registrados (PVP protection).");
     }
 
@@ -64,5 +67,23 @@ public class BlockyFactions extends JavaPlugin {
 
     public ConfigManager getConfigManager() {
         return configManager;
+    }
+
+    public LanguageManager getLanguageManager() {
+        return languageManager;
+    }
+
+    public GeoIPManager getGeoIPManager() {
+        return geoIPManager;
+    }
+
+    private final Map<String, Long> teleportCooldowns = new HashMap<>();
+
+    public void setLastDamage(String playerName) {
+        teleportCooldowns.put(playerName.toLowerCase(), System.currentTimeMillis());
+    }
+
+    public Map<String, Long> getTeleportCooldowns() {
+        return teleportCooldowns;
     }
 }

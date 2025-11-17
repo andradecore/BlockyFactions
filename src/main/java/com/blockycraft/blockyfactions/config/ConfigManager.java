@@ -1,7 +1,6 @@
 package com.blockycraft.blockyfactions.config;
 
 import com.blockycraft.blockyfactions.BlockyFactions;
-import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -77,48 +76,6 @@ public class ConfigManager {
 
     public int getMaxMembers() {
         return getInt("factions.max-members", 10);
-    }
-
-    public String getMessage(String key) {
-        return colorize(getString("msg." + key, "Mensagem não encontrada: " + key));
-    }
-
-    public String getMessage(String key, Object... args) {
-        String message = getMessage(key);
-        return colorize(String.format(message, args));
-    }
-
-    public String getHelpMessage(String key) {
-        return colorize(getString("help." + key, ""));
-    }
-
-    public String getInfoMessage(String key) {
-        return colorize(getString("info." + key, ""));
-    }
-
-    public String getInfoMessage(String key, Object... args) {
-        String message = getInfoMessage(key);
-        return colorize(String.format(message, args));
-    }
-
-    public String getRankMessage(String key) {
-        return colorize(getString("rank." + key, ""));
-    }
-
-    public String getRankMessage(String key, Object... args) {
-        String message = getRankMessage(key);
-        return colorize(String.format(message, args));
-    }
-
-    // Método para aplicar cor (usar sempre antes de enviar mensagem ao jogador)
-    private String colorize(String input) {
-        return ChatColor.translateAlternateColorCodes('&', input);
-    }
-
-    // Métodos básicos de propriedades
-
-    private String getString(String key, String defaultValue) {
-        return properties.getProperty(key, defaultValue);
     }
 
     private int getInt(String key, int defaultValue) {
