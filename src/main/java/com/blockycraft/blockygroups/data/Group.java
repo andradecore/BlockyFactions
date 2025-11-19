@@ -1,9 +1,9 @@
-package com.blockycraft.blockyfactions.data;
+package com.blockycraft.blockygroups.data;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Faction {
+public class Group {
 
     private String name;
     private String tag;
@@ -18,7 +18,7 @@ public class Faction {
     /** NOVO CAMPO: localização da base (World;x;y;z;yaw;pitch) */
     private String baseLocation = "";
 
-    public Faction(String name, String tag, String leader) {
+    public Group(String name, String tag, String leader) {
         this.name = name;
         this.tag = tag;
         this.leader = leader;

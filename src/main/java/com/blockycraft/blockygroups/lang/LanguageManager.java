@@ -1,6 +1,6 @@
-package com.blockycraft.blockyfactions.lang;
+package com.blockycraft.blockygroups.lang;
 
-import com.blockycraft.blockyfactions.BlockyFactions;
+import com.blockycraft.blockygroups.BlockyGroups;
 import org.bukkit.ChatColor;
 
 import java.io.File;
@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Properties;
 
 public class LanguageManager {
-    private final BlockyFactions plugin;
+    private final BlockyGroups plugin;
     private final Map<String, Properties> messages = new HashMap<>();
     private final String defaultLang = "en";
 
-    public LanguageManager(BlockyFactions plugin) {
+    public LanguageManager(BlockyGroups plugin) {
         this.plugin = plugin;
         loadLanguages();
     }
@@ -40,7 +40,7 @@ public class LanguageManager {
                 props.load(reader);
                 messages.put(lang, props);
             } catch (Exception e) {
-                System.out.println("[BlockyFactions] [ERROR] Could not load language file: " + langFile.getName());
+                System.out.println("[BlockyGroups] [ERROR] Could not load language file: " + langFile.getName());
                 e.printStackTrace();
             }
         }
@@ -58,7 +58,7 @@ public class LanguageManager {
                     java.nio.file.Files.copy(in, langFile.toPath());
                 }
             } catch (Exception e) {
-                System.out.println("[BlockyFactions] [ERROR] Could not save default language file: " + fileName);
+                System.out.println("[BlockyGroups] [ERROR] Could not save default language file: " + fileName);
                 e.printStackTrace();
             }
         }

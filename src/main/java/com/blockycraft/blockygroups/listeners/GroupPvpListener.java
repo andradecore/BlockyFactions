@@ -1,18 +1,18 @@
-package com.blockycraft.blockyfactions.listeners;
+package com.blockycraft.blockygroups.listeners;
 
-import com.blockycraft.blockyfactions.BlockyFactions;
-import com.blockycraft.blockyfactions.data.Faction;
+import com.blockycraft.blockygroups.BlockyGroups;
+import com.blockycraft.blockygroups.data.Group;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
-public class FactionPvpListener implements Listener {
+public class GroupPvpListener implements Listener {
 
-    private final BlockyFactions plugin;
+    private final BlockyGroups plugin;
 
-    public FactionPvpListener(BlockyFactions plugin) {
+    public GroupPvpListener(BlockyGroups plugin) {
         this.plugin = plugin;
     }
 
@@ -34,15 +34,15 @@ public class FactionPvpListener implements Listener {
 
         plugin.setLastDamage(target.getName());
 
-        Faction attackerFaction = plugin.getFactionManager().getPlayerFaction(attacker.getName());
-        Faction targetFaction = plugin.getFactionManager().getPlayerFaction(target.getName());
+        Group attackerGroup = plugin.getGroupManager().getPlayerGroup(attacker.getName());
+        Group targetGroup = plugin.getGroupManager().getPlayerGroup(target.getName());
 
-        if (attackerFaction == null || targetFaction == null) {
+        if (attackerGroup == null || targetGroup == null) {
             return;
         }
 
-        if (attackerFaction.getName().equalsIgnoreCase(targetFaction.getName())) {
-            if (!attackerFaction.isPvpEnabled()) {
+        if (attackerGroup.getName().equalsIgnoreCase(targetGroup.getName())) {
+            if (!attackerGroup.isPvpEnabled()) {
                 event.setCancelled(true);
                 String lang = plugin.getGeoIPManager().getPlayerLanguage(attacker);
                 attacker.sendMessage(plugin.getLanguageManager().get(lang, "error.pvp-disabled"));

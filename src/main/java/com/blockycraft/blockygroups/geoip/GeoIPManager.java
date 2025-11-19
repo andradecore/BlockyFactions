@@ -1,4 +1,4 @@
-package com.blockycraft.blockyfactions.geoip;
+package com.blockycraft.blockygroups.geoip;
 
 import com.blockycraft.blockygeoip.BlockyGeoIP;
 import com.blockycraft.blockygeoip.BlockyGeoIPAPI;
@@ -16,7 +16,7 @@ public class GeoIPManager {
                 geoIPEnabled = true;
             } catch (Exception e) {
                 geoIPEnabled = false;
-                System.out.println("[BlockyFactions] [ERROR] Error while getting BlockyGeoIP API instance: " + e.getMessage());
+                System.out.println("[BlockyGroups] [ERROR] Error while getting BlockyGeoIP API instance: " + e.getMessage());
             }
         }
     }

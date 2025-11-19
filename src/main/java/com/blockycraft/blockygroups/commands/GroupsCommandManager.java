@@ -1,8 +1,8 @@
-package com.blockycraft.blockyfactions.commands;
+package com.blockycraft.blockygroups.commands;
 
-import com.blockycraft.blockyfactions.BlockyFactions;
-import com.blockycraft.blockyfactions.data.Faction;
-import com.blockycraft.blockyfactions.lang.LanguageManager;
+import com.blockycraft.blockygroups.BlockyGroups;
+import com.blockycraft.blockygroups.data.Group;
+import com.blockycraft.blockygroups.lang.LanguageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -13,11 +13,11 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class FactionsCommandManager implements CommandExecutor {
-    private final BlockyFactions plugin;
+public class GroupsCommandManager implements CommandExecutor {
+    private final BlockyGroups plugin;
     private final LanguageManager langManager;
 
-    public FactionsCommandManager(BlockyFactions plugin) {
+    public GroupsCommandManager(BlockyGroups plugin) {
         this.plugin = plugin;
         this.langManager = plugin.getLanguageManager();
     }
@@ -30,9 +30,9 @@ public class FactionsCommandManager implements CommandExecutor {
             lang = plugin.getGeoIPManager().getPlayerLanguage((Player) sender);
         }
 
-        if (commandName.equals("fac") || commandName.equals("f") || commandName.equals("faccion")) {
+        if (commandName.equals("grp") || commandName.equals("f") || commandName.equals("grupo")) {
             return handleFacCommand(sender, args, lang);
-        } else if (commandName.equals("fc") || commandName.equals("cf")) {
+        } else if (commandName.equals("gc") || commandName.equals("cg")) {
             return handleFcCommand(sender, args, lang);
         }
         return false;
@@ -71,21 +71,21 @@ public class FactionsCommandManager implements CommandExecutor {
             String tag = args[1];
             String name = args[2];
             if (args.length == 3) {
-                plugin.getFactionManager().createFaction(name, tag, player, lang);
+                plugin.getGroupManager().createGroup(name, tag, player, lang);
             } else {
                 String color = args[3];
-                plugin.getFactionManager().createFaction(name, tag, player, color, lang);
+                plugin.getGroupManager().createGroup(name, tag, player, color, lang);
             }
         } else if (subCommand.equals("rank")) {
-            plugin.getFactionManager().reloadAllFactionsNetWorth();
-            List<Faction> rankedFactions = plugin.getFactionManager().getRankedFactions();
-            if (rankedFactions.isEmpty()) {
+            plugin.getGroupManager().reloadAllGroupsNetWorth();
+            List<Group> rankedGroups = plugin.getGroupManager().getRankedGroups();
+            if (rankedGroups.isEmpty()) {
                 player.sendMessage(langManager.get(lang, "error.ranking-empty"));
                 return true;
             }
             player.sendMessage(langManager.get(lang, "rank.header"));
             int rank = 1;
-            for (Faction f : rankedFactions) {
+            for (Group f : rankedGroups) {
                 player.sendMessage(langManager.get(lang, "rank.entry", rank, f.getTag(), f.getName(), f.getNetWorth()));
                 rank++;
                 if (rank > 10) { break; }
@@ -93,15 +93,15 @@ public class FactionsCommandManager implements CommandExecutor {
             player.sendMessage(langManager.get(lang, "rank.footer"));
         } else if (subCommand.equals("list")) {
             if (args.length == 1) {
-                Faction playerFaction = plugin.getFactionManager().getPlayerFaction(player.getName());
-                if (playerFaction == null) {
+                Group playerGroup = plugin.getGroupManager().getPlayerGroup(player.getName());
+                if (playerGroup == null) {
                     player.sendMessage(langManager.get(lang, "usage.list-other"));
                     return true;
                 }
-                plugin.getFactionManager().listFactionInfo(player, playerFaction.getName(), lang);
+                plugin.getGroupManager().listGroupInfo(player, playerGroup.getName(), lang);
             } else {
-                String factionToList = args[1];
-                plugin.getFactionManager().listFactionInfo(player, factionToList, lang);
+                String groupToList = args[1];
+                plugin.getGroupManager().listGroupInfo(player, groupToList, lang);
             }
         } else if (subCommand.equals("convidar") || subCommand.equals("invite") || subCommand.equals("invitar")) {
             if (args.length < 2) {
@@ -109,21 +109,21 @@ public class FactionsCommandManager implements CommandExecutor {
                 return true;
             }
             String targetName = args[1];
-            plugin.getFactionManager().invitePlayer(player, targetName, lang);
+            plugin.getGroupManager().invitePlayer(player, targetName, lang);
         } else if (subCommand.equals("entrar") || subCommand.equals("join")) {
             if (args.length < 2) {
                 player.sendMessage(langManager.get(lang, "usage.entrar"));
                 return true;
             }
-            String factionName = args[1];
-            plugin.getFactionManager().joinFaction(player, factionName, lang);
+            String groupName = args[1];
+            plugin.getGroupManager().joinGroup(player, groupName, lang);
         } else if (subCommand.equals("expulsar") || subCommand.equals("kick")) {
             if (args.length < 2) {
                 player.sendMessage(langManager.get(lang, "usage.expulsar"));
                 return true;
             }
             String targetName = args[1];
-            plugin.getFactionManager().kickPlayer(player, targetName, lang);
+            plugin.getGroupManager().kickPlayer(player, targetName, lang);
         } else if (subCommand.equals("promover") || subCommand.equals("promote")) {
             if (args.length < 3) {
                 player.sendMessage(langManager.get(lang, "usage.promover"));
@@ -131,21 +131,21 @@ public class FactionsCommandManager implements CommandExecutor {
             }
             String targetName = args[1];
             String rankParam = args[2];
-            plugin.getFactionManager().setPlayerRank(player, targetName, rankParam, lang);
+            plugin.getGroupManager().setPlayerRank(player, targetName, rankParam, lang);
         } else if (subCommand.equals("pvp")) {
             if (args.length < 2) {
                 player.sendMessage(langManager.get(lang, "usage.pvp"));
                 return true;
             }
-            plugin.getFactionManager().setFactionPvp(player, args[1], lang);
+            plugin.getGroupManager().setGroupPvp(player, args[1], lang);
         } else if (subCommand.equals("tag")) {
             if (args.length < 2) {
                 player.sendMessage(langManager.get(lang, "usage.tag"));
                 return true;
             }
-            plugin.getFactionManager().setFactionTag(player, args[1], lang);
+            plugin.getGroupManager().setGroupTag(player, args[1], lang);
         } else if (subCommand.equals("sair") || subCommand.equals("leave") || subCommand.equals("salir")) {
-            plugin.getFactionManager().leaveFaction(player, lang);
+            plugin.getGroupManager().leaveGroup(player, lang);
         } else {
             player.sendMessage(langManager.get(lang, "error.unknown-command"));
         }
@@ -158,23 +158,23 @@ public class FactionsCommandManager implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        Faction faction = plugin.getFactionManager().getPlayerFaction(player.getName());
-        if (faction == null) {
-            player.sendMessage(langManager.get(lang, "error.not-in-faction"));
+        Group group = plugin.getGroupManager().getPlayerGroup(player.getName());
+        if (group == null) {
+            player.sendMessage(langManager.get(lang, "error.not-in-group"));
             return true;
         }
         if (args.length == 0) {
-            player.sendMessage("§bUse: /fc <message>");
+            player.sendMessage("§bUse: /gc <message>");
             return true;
         }
         String message = String.join(" ", args);
         String formattedMessage = "§f[§bPrivado§f]§9 " + player.getName() + ":§b " + message;
 
         Set<String> members = new HashSet<>();
-        members.addAll(faction.getMembers());
-        members.addAll(faction.getOfficials());
-        members.add(faction.getLeader());
-        String treasurer = faction.getTreasuryPlayer();
+        members.addAll(group.getMembers());
+        members.addAll(group.getOfficials());
+        members.add(group.getLeader());
+        String treasurer = group.getTreasuryPlayer();
         if (treasurer != null && !treasurer.isEmpty()) {
             members.add(treasurer);
         }
@@ -188,32 +188,32 @@ public class FactionsCommandManager implements CommandExecutor {
             }
         }
         if (!sent) {
-            player.sendMessage("§cNenhum outro membro da sua faccao esta online para receber a mensagem.");
+            player.sendMessage("§cNenhum outro membro da sua grupo esta online para receber a mensagem.");
         }
         return true;
     }
 
     private boolean handleSetBaseCommand(Player player, String lang) {
-        Faction faction = plugin.getFactionManager().getPlayerFaction(player.getName());
-        if (faction == null || !faction.getLeader().equalsIgnoreCase(player.getName())) {
-            player.sendMessage("§cApenas o líder da facção pode definir a base.");
+        Group group = plugin.getGroupManager().getPlayerGroup(player.getName());
+        if (group == null || !group.getLeader().equalsIgnoreCase(player.getName())) {
+            player.sendMessage("§cApenas o líder do grupo pode definir a base.");
             return true;
         }
         Location loc = player.getLocation();
         String baseLocString = String.format("%s;%f;%f;%f;%f;%f",
                 loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-        plugin.getFactionManager().setFactionBase(faction, baseLocString);
+        plugin.getGroupManager().setGroupBase(group, baseLocString);
         player.sendMessage(langManager.get(lang, "success.base-set"));
         return true;
     }
 
     private boolean handleBaseCommand(Player player, String lang) {
-        Faction faction = plugin.getFactionManager().getPlayerFaction(player.getName());
-        if (faction == null) {
-            player.sendMessage(langManager.get(lang, "error.not-in-faction"));
+        Group group = plugin.getGroupManager().getPlayerGroup(player.getName());
+        if (group == null) {
+            player.sendMessage(langManager.get(lang, "error.not-in-group"));
             return true;
         }
-        String baseLocString = faction.getBaseLocation();
+        String baseLocString = group.getBaseLocation();
         if (baseLocString == null || baseLocString.isEmpty()) {
             player.sendMessage(langManager.get(lang, "error.no-base-defined"));
             return true;
@@ -247,7 +247,7 @@ public class FactionsCommandManager implements CommandExecutor {
             case 1:
                 player.sendMessage(langManager.get(lang, "help.page1.header"));
                 player.sendMessage(langManager.get(lang, "help.page1.criar"));
-                player.sendMessage(langManager.get(lang, "help.page1.fc"));
+                player.sendMessage(langManager.get(lang, "help.page1.gc"));
                 player.sendMessage(langManager.get(lang, "help.page1.sair"));
                 player.sendMessage(langManager.get(lang, "help.page1.entrar"));
                 player.sendMessage(langManager.get(lang, "help.page1.list"));

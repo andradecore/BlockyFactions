@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.blockycraft</groupId>
-    <artifactId>BlockyFactions</artifactId>
+    <artifactId>BlockyGroups</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>BlockyFactions.jar</name>
-    <description>A Factions system for BlockyCRAFT</description>
+    <name>BlockyGroups.jar</name>
+    <description>A Groups system for BlockyCRAFT</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,21 +1,21 @@
-name: BlockyFactions
-main: com.blockycraft.blockyfactions.BlockyFactions
+name: BlockyGroups
+main: com.blockycraft.blockygroups.BlockyGroups
 version: 1.0.0
 author: Bernardo Zukerman
-description: Plugin de faccoes com integracao ao BlockyClaim.
+description: Plugin de grupos com integracao ao BlockyClaim.
 softdepend: [BlockyGeoIP]
 permissions:
-  blockyfactions.fac:
-    description: Permite o uso de todos os comandos do /fac.
+  blockygroups.grp:
+    description: Permite o uso de todos os comandos do /grp.
     default: true
 commands:
-  fac:
-    description: Comando principal para gerenciar faccoes.
-    usage: /fac [pagina]
-    permission: blockyfactions.fac
-    aliases: [f, faccao, faccion]
-  fc:
-    description: Envia uma mensagem apenas para membros da sua facção.
-    usage: /fc <mensagem>
-    permission: blockyfactions.fac
-    aliases: [cf]
+  grp:
+    description: Comando principal para gerenciar grupos.
+    usage: /grp [pagina]
+    permission: blockygroups.grp
+    aliases: [f, grupo, grupo]
+  gc:
+    description: Envia uma mensagem apenas para membros da sua grupo.
+    usage: /gc <mensagem>
+    permission: blockygroups.grp
+    aliases: [cg]

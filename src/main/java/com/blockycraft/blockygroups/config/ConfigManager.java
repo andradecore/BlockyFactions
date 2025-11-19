@@ -1,6 +1,6 @@
-package com.blockycraft.blockyfactions.config;
+package com.blockycraft.blockygroups.config;
 
-import com.blockycraft.blockyfactions.BlockyFactions;
+import com.blockycraft.blockygroups.BlockyGroups;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,11 +12,11 @@ import java.util.Properties;
 
 public class ConfigManager {
 
-    private final BlockyFactions plugin;
+    private final BlockyGroups plugin;
     private final File configFile;
     private Properties properties;
 
-    public ConfigManager(BlockyFactions plugin) {
+    public ConfigManager(BlockyGroups plugin) {
         this.plugin = plugin;
         this.configFile = new File(plugin.getDataFolder(), "config.properties");
         this.properties = new Properties();
@@ -37,9 +37,9 @@ public class ConfigManager {
         // Carrega as propriedades do arquivo
         try (FileInputStream input = new FileInputStream(configFile)) {
             properties.load(input);
-            System.out.println("[BlockyFactions] Configurações carregadas de config.properties");
+            System.out.println("[BlockyGroups] Configurações carregadas de config.properties");
         } catch (IOException e) {
-            System.err.println("[BlockyFactions] Erro ao carregar config.properties: " + e.getMessage());
+            System.err.println("[BlockyGroups] Erro ao carregar config.properties: " + e.getMessage());
         }
     }
 
@@ -47,7 +47,7 @@ public class ConfigManager {
         try {
             InputStream defaultConfig = plugin.getClass().getResourceAsStream("/config.properties");
             if (defaultConfig == null) {
-                System.err.println("[BlockyFactions] Arquivo config.properties padrão não encontrado nos resources!");
+                System.err.println("[BlockyGroups] Arquivo config.properties padrão não encontrado nos resources!");
                 return;
             }
 
@@ -61,9 +61,9 @@ public class ConfigManager {
             output.close();
             defaultConfig.close();
 
-            System.out.println("[BlockyFactions] Arquivo config.properties padrão criado.");
+            System.out.println("[BlockyGroups] Arquivo config.properties padrão criado.");
         } catch (IOException e) {
-            System.err.println("[BlockyFactions] Erro ao criar config.properties: " + e.getMessage());
+            System.err.println("[BlockyGroups] Erro ao criar config.properties: " + e.getMessage());
         }
     }
 
@@ -75,7 +75,7 @@ public class ConfigManager {
     // Métodos utilitários para obter configurações
 
     public int getMaxMembers() {
-        return getInt("factions.max-members", 10);
+        return getInt("groups.max-members", 10);
     }
 
     private int getInt(String key, int defaultValue) {
